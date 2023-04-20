@@ -1,4 +1,4 @@
-name: Build and deploy backend
+name: Deploy Backend
 on:
   push:
     branches:
@@ -9,10 +9,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install dependencies
-        run: npm install
-      - name: Build backend
-        run: npm run build
       - name: Deploy to Digital Ocean
         uses: appleboy/ssh-action@master
         with:
@@ -22,9 +18,13 @@ jobs:
           script: |
             cd ~/pt-gpt
             git pull
+            wall "Pulled latest version."
             npm install
-            cd /frontend
+            wall "Installed any new dependencies."
+            cd frontend
             npm install
+            wall "Installed any new dependencies for frontend."
             npx expo build:web
+            wall "Built new version of frontend."
             pm2 restart app
-            wall "Deployed new version of PT-GPT"
+            wall "✔️Deployed new version of PT-GPT\n"
