@@ -24,7 +24,7 @@ jobs:
             cd frontend
             npm install
             wall "Installed any new dependencies for frontend."
-            npx expo build:web
+            npx expo export:web
             wall "Built new version of frontend."
             pm2 restart app
             wall "✔️Deployed new version of PT-GPT\n"
