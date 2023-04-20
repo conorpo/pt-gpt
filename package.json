@@ -1,24 +1,32 @@
 {
   "name": "pt-gpt",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
+  "description": "GPT-4 Personal Trainer by COP4331 Group 15",
+  "main": "app.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conorpo/pt-gpt.git"
+  },
+  "keywords": [
+    "gpt",
+    "pt",
+    "ai",
+    "personal_trainer",
+    "fitness",
+    "health"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/conorpo/pt-gpt/issues"
+  },
+  "homepage": "https://github.com/conorpo/pt-gpt#readme",
   "dependencies": {
-    "expo": "~48.0.10",
-    "expo-status-bar": "~1.4.4",
-    "react": "18.2.0",
-    "react-native": "0.71.6",
-    "react-native-web": "~0.18.10",
-    "react-dom": "18.2.0",
-    "@expo/webpack-config": "^18.0.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0"
-  },
-  "private": true
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.4"
+  }
 }
