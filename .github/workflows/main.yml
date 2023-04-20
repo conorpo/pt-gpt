@@ -16,11 +16,11 @@ jobs:
       - name: Deploy to Digital Ocean
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DROPLET_IP }}
+          host: ${{ secrets.HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_PASSWORD }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /var/w
+            cd ~/pt-gpt
             git pull
             npm install
             pm2 restart backend
