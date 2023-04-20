@@ -23,4 +23,6 @@ jobs:
             cd ~/pt-gpt
             git pull
             npm install
-            pm2 restart backend
+            cd /frontend
+            npx expo build:web
+            pm2 restart app
