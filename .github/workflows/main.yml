@@ -27,4 +27,4 @@ jobs:
             npx expo export:web
             sudo wall "Built new version of frontend." -n
             pm2 restart pt-gpt
-            sudo wall "✔️Deployed new version of PT-GPT\n" -n
+            sudo wall "✔️Deployed new version of PT-GPT at http://pt-gpt.com\n" -n

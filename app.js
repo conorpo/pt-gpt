@@ -15,8 +15,6 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => { 
   if(NODE_ENV === 'development') {
     console.log(`Server is hosted at http://localhost:${PORT}`);
-  }else{
-    console.log(`Server is hosted at http://pt-gpt.com:${PORT}`);
   }
 });
 
