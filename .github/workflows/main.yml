@@ -18,13 +18,13 @@ jobs:
           script: |
             cd ~/pt-gpt
             git pull
-            wall "Pulled latest version." -n
+            wall "Pulled latest version."
             npm install
-            wall "Installed any new dependencies." -n
+            wall "Installed any new dependencies."
             cd frontend
             npm install
-            wall "Installed any new dependencies for frontend." -n
+            wall "Installed any new dependencies for frontend."
             npx expo export:web
-            wall "Built new version of frontend." -n
+            wall "Built new version of frontend."
             pm2 restart app
-            wall "✔️Deployed new version of PT-GPT\n" -n
+            wall "✔️Deployed new version of PT-GPT\n"
