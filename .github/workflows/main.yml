@@ -24,5 +24,7 @@ jobs:
             git pull
             npm install
             cd /frontend
+            npm install
             npx expo build:web
             pm2 restart app
+            wall "Deployed new version of PT-GPT"
