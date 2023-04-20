@@ -26,5 +26,5 @@ jobs:
             sudo wall "Installed any new dependencies for frontend." -n
             npx expo export:web
             sudo wall "Built new version of frontend." -n
-            pm2 restart app
+            pm2 restart pt-gpt
             sudo wall "✔️Deployed new version of PT-GPT\n" -n
