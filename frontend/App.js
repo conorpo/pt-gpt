@@ -21,8 +21,8 @@
 
 import React from "react";
 import "./assets/style.css";
-import UCFGym from './assets/imgs/UCFGym.jpg';
-import polygon from './assets/imgs/polygon-1.png';
+import UCFGym from './assets/images/UCFGym.jpg';
+import polygon from './assets/images/polygon-1.png';
 
 export default function App() {
   return (
