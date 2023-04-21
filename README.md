@@ -15,8 +15,7 @@ then, build desired platform:
 
 ```bash
 npm run web
-npm run android
-npm run ios
+npm run export # to export to ios/android (this doesnt work yet)
 ```
 
 to hot-reload the app during development: 
@@ -50,6 +49,15 @@ this requires nodemon to be installed globally
 npm install -g nodemon
 ```
 
+
+### To Setup Expo and run on Android / IOS
+Download the Expo app on your phone and create an account. Then run the following commands in the frontend directory:
+
+```bash
+npx expo login
+```
+
+Then scan the QR code that appears in the terminal with your phone. You should now be able to run the app on your phone.
 
 ### Made By
 - [Conor O'Malley](https://github.com/conorpo)

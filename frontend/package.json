@@ -4,8 +4,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "web": "npx expo export:web",
-    "android": "npx expo export:android",
-    "ios": "npx expo export:ios",
+    "export": "npx expo export",
     "start": "npx expo start"
   },
   "dependencies": {

@@ -24,7 +24,9 @@ jobs:
             cd frontend
             npm install
             sudo wall "Installed any new dependencies for frontend." -n
-            npx expo export:web
-            sudo wall "Built new version of frontend." -n
+            npm run web
+            sudo wall "Built Web version of frontend." -n
+            npm run export
+            sudo wall "Built IOS / Android versions of frontend." -n
             pm2 restart pt-gpt
             sudo wall "✔️Deployed new version of PT-GPT at http://pt-gpt.com" -n
