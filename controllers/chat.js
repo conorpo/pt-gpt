@@ -1,4 +1,4 @@
-const UserModel = require('../models/User');
+const User = require('../models/User');
 const logger = require('../config/logger');
 const openai = require('../config/openai_connection');
 require('dotenv').config();
@@ -6,48 +6,40 @@ require('dotenv').config();
 
 module.exports = async (req, res, next) => {
     try{    
-        let messages; 
+        const user = await User.findById(req.session.user_id)
 
-        if(process.env.NODE_ENV === 'development') {
-            messages = require('../config/test_chat');
-        }else{
-            // Get User from DB  
-            const User = await UserModel.findById(req.user.id);
-
-            messages = User.messages;
+        if(!user) {
+            return res.status(404).json({msg: 'User not found'});
         }
 
-        
-        // Add the message from the user to the messages array
-        messages.push({
+        const messages = [{role: 'system', content: process.env.SYSTEM_MESSAGE}].concat(user.messages);
+
+        const new_messages = [{
             role: 'user',
             content: req.body.msg
-        });
-        
+        }];
+
+        console.log(messages.concat(new_messages));
         
         // Request OpenAI to complete the next message
         const completion = await openai.createChatCompletion({
             model: process.env.OPENAI_MODEL,
-            messages
+            messages: messages.concat(new_messages)
         });
 
         const response = completion.data.choices[0].message;
-
-        messages.push(response);
-        logger.info(`Completed Message from ${(process.env.NODE_ENV === 'development') ? "Test User" : User.name}: ${response.content}`);
-            
-        res.status(200).send(response.content);
-
-        if(process.env.NODE_ENV === 'development') return;
+        console.log(response)
+        new_messages.push(response);
         
-        User.updateOne({messages}); 
-    } catch (err) {
-        logger.error(err.message);
+        logger.info(`Completed Message from ${user.name}: ${response.content}`);
+        
+        
+        await User.findByIdAndUpdate(req.session.user_id,
+            {$push: {messages: {$each: new_messages}}} 
+        );
 
-        if(process.env.NODE_ENV === 'development') {
-            return res.status(500).json(err.message);
-        } else {
-            return res.status(500).json({msg: 'Server Error'});
-        }
+        res.status(200).send(response.content);    
+    } catch (err) {
+        return res.status(500).json({msg: err.message});
     }
 }
