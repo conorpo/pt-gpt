@@ -1,5 +1,9 @@
-#Deployment Key
-.key
+#Env Variable
+.env
+
+#System
+/logs/*
+/config/test_chat.js
 
 #NPM Modules
 /node_modules

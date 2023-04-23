@@ -26,8 +26,13 @@
   },
   "homepage": "https://github.com/conorpo/pt-gpt#readme",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mongoose": "^7.0.4"
+    "express-session": "^1.17.3",
+    "mongoose": "^7.0.4",
+    "openai": "^3.2.1",
+    "winston": "^3.8.2"
   }
 }
