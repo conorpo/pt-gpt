@@ -18,9 +18,14 @@ module.exports = async (req,res) => {
 
         const user = await newUser.save();
 
-        req.session.user_id = user._id;
+        const {hashV, ...userWithoutHash} = user.toObject();
+        const {messages, ...userWithoutMessages} = userWithoutHash;
 
-        res.status(200).json(user);
+        return res.status(200).json({
+            user: userWithoutMessages,
+            messages: messages.filter(message => message.role !== 'system'),
+            token: jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'})
+        })
     } catch (err) {
         res.status(500).json({message: err.message});
     }

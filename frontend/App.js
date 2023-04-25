@@ -5,26 +5,37 @@ import { createNativeStackNavigator} from '@react-navigation/native-stack';
 //Screens
 import ChatScreen from './screens/Chat.js';
 import ProfileScreen from './screens/Profile.js';
+import LoginScreen from './screens/Login.js';
+
+//User Context
+import {UserProvider} from './contexts/User.js';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Chat">
-        <Stack.Screen 
-          name="Chat" 
-          component={ChatScreen}
-          options={{
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
-          name="Settings" 
-          component={ProfileScreen} 
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <UserProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen 
+            name="Chat" 
+            component={ChatScreen}
+            options={{
+              headerShown: false,
+            }} 
+
+          />
+          <Stack.Screen 
+            name="Profile" 
+            component={ProfileScreen} 
+          />
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </UserProvider>
   );
 }
 

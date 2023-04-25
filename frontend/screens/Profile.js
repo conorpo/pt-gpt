@@ -6,7 +6,21 @@ const ProfileScreen = ({navigator}) => {
             title="Back to Chat"
             onPress={() => navigator.goBack()}
         />
+
+        <View style={{flexDirection:"row"}}>
+            <Text>One Rep Bench</Text>
+            <View style={styles.space}></View>
+            {/* <TextInput/> */}
+        </View>
+
     </View>
 }
+
+// const styles = StyleSheet.create({
+//     space: {
+//         height: 30,
+//         width: 30
+//     }
+//   });
 
 export default ProfileScreen;

@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
         right: 10,
         padding: 10,
         opacity: 0.7,
+        zIndex: 1,
     },
     buttonImage: {
         width: 30,
@@ -17,8 +18,8 @@ const styles = StyleSheet.create({
 
 const SettingsButton = ({ navigation }) => {
     return (
-        <Pressable style={styles.button} onPress={() => navigation.navigate('Settings')}>
-            <Image style={styles.buttonImage} source={require('../assets/imgs/icons8-settings.svg')} />
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Profile')}>
+            <Image style={styles.buttonImage} source={require('./icons8-settings.svg')} />
         </Pressable>
     )
 }
