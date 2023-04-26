@@ -44,7 +44,7 @@ const ChatScreen = ({navigation}) => {
             setIsTyping(false);
             setMessages(previousMessages => {
                 return GiftedChat.append(previousMessages, [{
-                    _id: previousMessages.length,
+                    _id: GiftedChat.messageIdGenerator(),
                     text,
                     createdAt,
                     user: {

@@ -1,5 +1,6 @@
 import React, {useContext, useEffect} from 'react'
 import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable} from 'react-native'
+import { GiftedChat } from 'react-native-gifted-chat';
 import { UserContext } from '../contexts/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,7 +11,7 @@ const LoginScreen = ({ navigation }) => {
     
     function convertMessage(message, index) {
         return {
-            _id: index,
+            _id: GiftedChat.messageIdGenerator(),
             text: message.content,
             createdAt: message.createdAt,
             user: {
