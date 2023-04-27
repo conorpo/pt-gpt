@@ -1,7 +1,9 @@
 import { Button, View } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const ProfileScreen = ({navigation}) => {
-    <View style={{backgroundColor: "blue"}}>
+    return (<View style={{backgroundColor: "blue"}}>
         <Button
             title="Back to Chat"
             onPress={() => navigation.goBack()}
@@ -20,7 +22,7 @@ const ProfileScreen = ({navigation}) => {
             <View style={styles.space}></View>
         </View> */}
 
-    </View>
+    </View>);
 }
 
 // const styles = StyleSheet.create({
