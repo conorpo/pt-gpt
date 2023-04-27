@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
 
 
-
 const styles = StyleSheet.create({
     input: {
         height: 40,
@@ -22,6 +21,7 @@ const styles = StyleSheet.create({
 
 
 const ChatScreen = ({navigation}) => {
+    console.log("In Chat");
     const {user, messages, setMessages, URI} = useContext(UserContext);
     const [isTyping, setIsTyping] = useState(false);
 
