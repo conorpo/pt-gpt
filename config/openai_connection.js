@@ -10,9 +10,9 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 openai.listModels().then((response) => {
-    console.log(`Open AI Connection Successful.`)
+    logger.info(`Open AI Connection Successful.`)
 }).catch((err) => {
-    console.log(err);
+    logger.error(err)
 });
 
 module.exports = openai;

@@ -1,100 +1,42 @@
-// import { StatusBar } from 'expo-status-bar';
-// import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator} from '@react-navigation/native-stack';
 
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text>Open up App.js to start working on your app!</Text>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// }
+//Screens
+import ChatScreen from './screens/Chat.js';
+import ProfileScreen from './screens/Profile.js';
+import LoginScreen from './screens/Login.js';
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
+//User Context
+import {UserProvider} from './contexts/User.js';
 
-import React from "react";
-import "./assets/style.css";
-import UCFGym from './assets/images/UCFGym.jpg';
-import polygon from './assets/images/polygon-1.png';
+const Stack = createNativeStackNavigator();
 
-export default function App() {
+const App = () => {
   return (
-    <div className={"frame-frame-wrapper"}>
-      <div className={"frame-frame"}>
-        <div className={"frame-overlap"}>
-          <div className={"frame-rectangle"} />
-          <img className={"frame-ucfgym"} src={UCFGym} />
-        </div>
-        <div className={"frame-message"}>
-          <div className={"frame-overlap-group"}>
-            <div className={"frame-rectangle-3"} />
-            <img className={"frame-polygon"} src={polygon} />
-            <h1 className={"frame-text-wrapper"}>Find the perfect workouts to meet your goals!</h1>
-          </div>
-        </div>
-        <button type="button" className={"frame-div"}>Enter Data</button>
-        <button type="button" className={"frame-text-wrapper-2"}>Chat with Personal Trainer</button>
-      </div>
-    </div>
-  );
-};
+    <UserProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen 
+            name="Chat" 
+            component={ChatScreen}
+            options={{
+              headerShown: false,
+            }} 
 
-function Data() {
-  return (
-    <div className={"data-data-wrapper"}>
-      <div className={"data-data"}>
-        <div className={"data-back-arrow"}>
-          <div className={"data-rectangle"} />
-          <div className={"data-rectangle-3"} />
-        </div>
-        <div className={"data-height"}>
-          <div className={"data-text-wrapper"}>Height</div>
-          <input className={"data-feet"} />
-          <div className={"data-div"}>ft.</div>
-          <input className={"data-in"} />
-          <div className={"data-text-wrapper-2"}>in.</div>
-        </div>
-        <div className={"data-weight"}>
-          <div className={"data-text-wrapper-3"}>Weight</div>
-          <input className={"data-input"} />
-          <div className={"data-text-wrapper-4"}>lbs.</div>
-        </div>
-        <div className={"data-gender"}>
-          <div className={"data-p"}>Gender (enter M or F)</div>
-          <input className={"data-input"} />
-        </div>
-        <h1 className={"data-h-1"}>Data</h1>
-      </div>
-    </div>
+          />
+          <Stack.Screen 
+            name="Profile" 
+            component={ProfileScreen} 
+          />
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </UserProvider>
   );
 }
 
-function Chat () {
-  return (
-    <div className={"PT-PT-wrapper"}>
-      <div className={"PT-PT"}>
-        <div className={"PT-overlap"}>
-          <div className={"PT-heading"}>
-            <div className={"PT-overlap-group"}>
-              <div className={"PT-overlap-group1"}>
-                <div className={"PT-text-wrapper"}>PT</div>
-              </div>
-              <div className={"PT-div"}>Personal Trainer</div>
-            </div>
-          </div>
-          <div className={PT-back-arrow}>
-            <div className={"PT-rectangle"} />
-            <div className={"PT-rectangle-3"} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default App;
