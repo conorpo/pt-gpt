@@ -22,11 +22,12 @@ module.exports = async (req,res) => {
         const {messages, ...userWithoutMessages} = userWithoutHash;
 
         return res.status(200).json({
+            status: 200,
             user: userWithoutMessages,
             messages: messages.filter(message => message.role !== 'system'),
             token: jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'})
         })
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({status: 500, message: err.message});
     }
 };

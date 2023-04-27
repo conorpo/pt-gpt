@@ -1,4 +1,4 @@
-import React, { useContext, useEffect , useRef} from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable } from 'react-native'
 import { UserContext } from '../contexts/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -65,12 +65,16 @@ const LoginScreen = ({ navigation }) => {
 
             const result = await response.json();
 
-            setUser(result.user);
-            setMessages(result.messages.map(convertMessage));
-            await AsyncStorage.setItem('token', result.token);
+            if (result.status == 200) {
+                setUser(result.user);
+                setMessages(result.messages.map(convertMessage));
+                await AsyncStorage.setItem('token', result.token);
 
-            navigation.navigate('Profile');
-
+                navigation.navigate('Profile');
+            }
+            console.log("Message: " + result.message);
+            errorRef.current.innerHTML = result.message;
+            
         } catch (err) {
             console.log(err);
         }
@@ -90,9 +94,9 @@ const LoginScreen = ({ navigation }) => {
     return (
         // Everything in one View - Can only return one thing
         <View>
-            <Text 
+            <Text
                 ref={errorRef}
-                style={styles.error}/>
+                style={styles.error} />
             <TextInput
                 style={styles.input}
                 onChangeText={onChangeEmai}
