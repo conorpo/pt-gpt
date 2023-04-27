@@ -1,13 +1,14 @@
-import React, {useContext, useEffect} from 'react'
-import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable} from 'react-native'
+import React, { useContext, useEffect , useRef} from 'react'
+import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable } from 'react-native'
 import { UserContext } from '../contexts/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
-    const {user, setUser, setMessages, URI} = useContext(UserContext);
+    const { user, setUser, setMessages, URI } = useContext(UserContext);
     const [email, onChangeEmai] = React.useState('conor4arms@gmail.com');
     const [password, onChangePassword] = React.useState('12345');
-    
+    const errorRef = useRef(null);
+
     function convertMessage(message, index) {
         return {
             _id: index,
@@ -21,41 +22,47 @@ const LoginScreen = ({ navigation }) => {
         }
     }
 
-    async function login(){
+    async function login() {
         try {
             const response = await fetch(`${URI}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({ email, password })
             });
-            
+
             const result = await response.json();
-            
+
             console.log(result);
+            console.log("Status: " + result.status)
 
-            setUser(result.user);           
-            setMessages(result.messages.reverse().map(convertMessage, result.user));
-            await AsyncStorage.setItem('token', result.token);
+            if (result.status == 200) {
+                setUser(result.user);
+                setMessages(result.messages.reverse().map(convertMessage, result.user));
+                await AsyncStorage.setItem('token', result.token);
+                navigation.navigate('Chat');
+            }
 
-            navigation.navigate('Chat');
+            console.log("Message: " + result.message);
+            errorRef.current.innerHTML = result.message;
+
         } catch (err) {
             console.log(err);
         }
-        
+
     }
 
-    async function register(){
+    async function register() {
         try {
             const response = await fetch(`${URI}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({ email, password })
             });
-            
+
             const result = await response.json();
 
             setUser(result.user);
@@ -70,19 +77,22 @@ const LoginScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
-        async function getToken(){
+        async function getToken() {
             const JWT = await AsyncStorage.getItem('token');
-            if(JWT){
+            if (JWT) {
                 navigation.navigate('Chat');
             }
         }
         // getToken();
     }, []);
-            
-    
+
+
     return (
         // Everything in one View - Can only return one thing
         <View>
+            <Text 
+                ref={errorRef}
+                style={styles.error}/>
             <TextInput
                 style={styles.input}
                 onChangeText={onChangeEmai}
@@ -95,10 +105,10 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={onChangePassword}
                 value={password}
                 placeholder="Password"
-                keyboardType="numeric" 
+                keyboardType="numeric"
             />
-            
-            <View style={{flexDirection:"row", justifyContent: "center"}}>
+
+            <View style={{ flexDirection: "row", justifyContent: "center" }}>
                 <Button
                     title="Login"
                     onPress={login}
@@ -116,6 +126,10 @@ const LoginScreen = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
+    error: {
+        color: "#FF0000",
+        padding: 10
+    },
     input: {
         height: 40,
         margin: 12,
@@ -125,12 +139,12 @@ const styles = StyleSheet.create({
     button: {
         height: 40,
         width: 20,
-        color:"#A18276"
+        color: "#A18276"
     },
     space: {
         height: 30,
         width: 30
     }
-  });
+});
 
 export default LoginScreen;

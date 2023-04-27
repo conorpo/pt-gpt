@@ -1,0 +1,6 @@
+# Reloads the front end and starts server
+# Idk how else to do it
+cd frontend
+npm run web
+cd ..
+npm run start
