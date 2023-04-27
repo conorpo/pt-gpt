@@ -17,6 +17,8 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ~/pt-gpt
+            git stash push
+            git stash drop
             git pull
             sudo wall "Pulled latest version." -n
             npm install
