@@ -1,17 +1,19 @@
 import React, {useContext, useEffect} from 'react'
 import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable} from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat';
+import {v4 as messageIdGenerator} from 'uuid';
 import { UserContext } from '../contexts/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
     const {user, setUser, setMessages, URI} = useContext(UserContext);
-    const [email, onChangeEmai] = React.useState('conor4arms@gmail.com');
-    const [password, onChangePassword] = React.useState('12345');
+    const [email, onChangeEmai] = React.useState('');
+    const [name , onChangeName] = React.useState('');
+    const [password, onChangePassword] = React.useState('');
     
     function convertMessage(message, index) {
         return {
-            _id: GiftedChat.messageIdGenerator(),
+            _id: messageIdGenerator(),
             text: message.content,
             createdAt: message.createdAt,
             user: {
@@ -54,16 +56,14 @@ const LoginScreen = ({ navigation }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({email, password, name})
             });
             
             const result = await response.json();
 
             setUser(result.user);
-            setMessages(result.messages.map(convertMessage));
-            await AsyncStorage.setItem('token', result.token);
 
-            navigation.navigate('Profile');
+            alert("Verify Your Email to Login!");
 
         } catch (err) {
             console.log(err);
@@ -74,10 +74,27 @@ const LoginScreen = ({ navigation }) => {
         async function getToken(){
             const JWT = await AsyncStorage.getItem('token');
             if(JWT){
-                navigation.navigate('Chat');
+                try {
+                    const response = await fetch(`${URI}/api/protected/user`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${JWT}`
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    setUser(result.user);
+                    setMessages(result.messages.reverse().map(convertMessage, result.user));
+                    
+                    navigation.navigate('Chat');
+                } catch (err) {
+                    console.log(err);
+                }   
             }
         }
-        // getToken();
+        getToken();
     }, []);
             
     
@@ -98,7 +115,13 @@ const LoginScreen = ({ navigation }) => {
                 placeholder="Password"
                 keyboardType="numeric" 
             />
-            
+            <TextInput
+                style={styles.input}
+                onChangeText={onChangeName}
+                value={name}
+                placeholder="Name (Only Needed for Register)"
+                keyboardType="default"
+            />
             <View style={{flexDirection:"row", justifyContent: "center"}}>
                 <Button
                     title="Login"

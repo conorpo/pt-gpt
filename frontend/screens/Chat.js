@@ -1,6 +1,7 @@
 import React, {useState, useCallback, useEffect, useContext} from 'react';
 import { SafeAreaView, Text, TextInput, View, ScrollView, StyleSheet} from 'react-native';
 import SettingsButton from '../components/SettingsButton.js';
+import {v4 as messageIdGenerator} from 'uuid';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { UserContext } from '../contexts/User.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -44,7 +45,7 @@ const ChatScreen = ({navigation}) => {
             setIsTyping(false);
             setMessages(previousMessages => {
                 return GiftedChat.append(previousMessages, [{
-                    _id: GiftedChat.messageIdGenerator(),
+                    _id: messageIdGenerator(),
                     text,
                     createdAt,
                     user: {

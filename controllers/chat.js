@@ -33,7 +33,6 @@ module.exports = async (req, res, next) => {
         new_messages.push(response);
 
         logger.info(`Completed Message from ${user.name}: ${response.content}`);
-        console.log(`Completed Message from ${user.name}: ${response.content}`)
         
         await User.findByIdAndUpdate(req.userId,
             {$push: {messages: {$each: new_messages}}} 

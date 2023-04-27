@@ -1,17 +1,24 @@
 import { Button, View } from "react-native";
 
-const ProfileScreen = ({navigator}) => {
+const ProfileScreen = ({navigation}) => {
     <View style={{backgroundColor: "blue"}}>
         <Button
             title="Back to Chat"
-            onPress={() => navigator.goBack()}
+            onPress={() => navigation.goBack()}
         />
 
-        <View style={{flexDirection:"row"}}>
+        <Button
+            title="Logout"
+            onPress={() => {
+                AsyncStorage.removeItem('token');
+                navigation.navigate('Login');                
+            }}
+        />
+
+        {/* <View style={{flexDirection:"row"}}>
             <Text>One Rep Bench</Text>
             <View style={styles.space}></View>
-            {/* <TextInput/> */}
-        </View>
+        </View> */}
 
     </View>
 }
