@@ -1,4 +1,0 @@
-cd frontend
-npm run web
-cd ..
-npm run start
