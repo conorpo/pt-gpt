@@ -1,16 +1,17 @@
-import React, {useContext, useEffect} from 'react'
-import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable} from 'react-native'
+import React, { useContext, useEffect, useRef } from 'react'
+import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat';
-import {v4 as messageIdGenerator} from 'uuid';
+import { v4 as messageIdGenerator } from 'uuid';
 import { UserContext } from '../contexts/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
-    const {user, setUser, setMessages, URI} = useContext(UserContext);
+    const { user, setUser, setMessages, URI } = useContext(UserContext);
     const [email, onChangeEmai] = React.useState('');
-    const [name , onChangeName] = React.useState('');
+    const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
-    
+    const errorRef = useRef(null);
+
     function convertMessage(message, index) {
         return {
             _id: messageIdGenerator(),
@@ -24,42 +25,54 @@ const LoginScreen = ({ navigation }) => {
         }
     }
 
-    async function login(){
+    async function login() {
         try {
             const response = await fetch(`${URI}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({ email, password })
             });
-            
+
             const result = await response.json();
-            
+
             console.log(result);
+            console.log("Status: " + result.status);
 
-            setUser(result.user);           
-            setMessages(result.messages.reverse().map(convertMessage, result.user));
-            await AsyncStorage.setItem('token', result.token);
+            if (result.status != 200) {
+                console.log("Message: " + result.message);
+                errorRef.current.innerHTML = result.message;
+                return;
+            }
+                setUser(result.user);
+                setMessages(result.messages.reverse().map(convertMessage, result.user));
+                await AsyncStorage.setItem('token', result.token);
 
-            navigation.navigate('Chat');
+                navigation.navigate('Chat');
         } catch (err) {
             console.log(err);
         }
-        
+
     }
 
-    async function register(){
+    async function register() {
         try {
             const response = await fetch(`${URI}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email, password, name})
+                body: JSON.stringify({ email, password, name })
             });
-            
+
             const result = await response.json();
+
+            if (result.status != 200) {
+                console.log("Message: " + result.message);
+                errorRef.current.innerHTML = result.message;
+                return;
+            }
 
             setUser(result.user);
 
@@ -71,9 +84,9 @@ const LoginScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
-        async function getToken(){
+        async function getToken() {
             const JWT = await AsyncStorage.getItem('token');
-            if(JWT){
+            if (JWT) {
                 try {
                     const response = await fetch(`${URI}/api/protected/user`, {
                         method: 'GET',
@@ -87,20 +100,24 @@ const LoginScreen = ({ navigation }) => {
 
                     setUser(result.user);
                     setMessages(result.messages.reverse().map(convertMessage, result.user));
-                    
+
                     navigation.navigate('Chat');
                 } catch (err) {
                     console.log(err);
-                }   
+                }
             }
         }
         getToken();
     }, []);
-            
-    
+
+
     return (
         // Everything in one View - Can only return one thing
         <View>
+            <Text
+                ref={errorRef}
+                style={styles.error}
+            />
             <TextInput
                 style={styles.input}
                 onChangeText={onChangeEmai}
@@ -113,7 +130,7 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={onChangePassword}
                 value={password}
                 placeholder="Password"
-                keyboardType="numeric" 
+                keyboardType="numeric"
             />
             <TextInput
                 style={styles.input}
@@ -122,7 +139,7 @@ const LoginScreen = ({ navigation }) => {
                 placeholder="Name (Only Needed for Register)"
                 keyboardType="default"
             />
-            <View style={{flexDirection:"row", justifyContent: "center"}}>
+            <View style={{ flexDirection: "row", justifyContent: "center" }}>
                 <Button
                     title="Login"
                     onPress={login}
@@ -149,12 +166,16 @@ const styles = StyleSheet.create({
     button: {
         height: 40,
         width: 20,
-        color:"#A18276"
+        color: "#A18276"
     },
     space: {
         height: 30,
         width: 30
+    },
+    error: {
+        color: "red",
+        padding: 10
     }
-  });
+});
 
 export default LoginScreen;

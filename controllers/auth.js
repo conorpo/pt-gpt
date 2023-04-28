@@ -18,13 +18,13 @@ const login = async (req,res) => {
     try {
         const user = await User.findOne({email});
 
-        if (!user) return res.status(400).json({message: 'Username or password is incorrect.'});
+        if (!user) return res.status(400).json({status: 400, message: 'Username or password is incorrect.'});
 
-        if (!user.verified) return res.status(400).json({message: 'User not verified.'});
+        if (!user.verified) return res.status(400).json({status: 400, message: 'User not verified.'});
 
         const isMatch = await bcrypt.compare(password, user.hash);
 
-        if (!isMatch) return res.status(400).json({message: 'Username or password is incorrect.'});
+        if (!isMatch) return res.status(400).json({status: 400, message: 'Username or password is incorrect.'});
 
         user.last_login_at = new Date();
         await user.save();
@@ -32,12 +32,13 @@ const login = async (req,res) => {
         const {messages, userSafe} = user.split();
 
         return res.status(200).json({
+            status: 200,
             user: userSafe,
             messages,
             token: create_token(user)
         })
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({status: 500, message: err.message});
     }  
 }
 
@@ -61,11 +62,12 @@ const register = async (req,res) => {
         sendInitialVerification(email, user);
         
         return res.status(200).json({
+            status: 200,
             user: userSafe,
             messages
         })
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({status: 500, message: err.message});
     }
 }
 
@@ -75,11 +77,11 @@ const verify = async (req,res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decoded);
     try {
-        if(!decoded.verify) return res.status(401).json({message: 'Invalid JWT token'});
+        if(!decoded.verify) return res.status(401).json({status: 401, message: 'Invalid JWT token'});
 
         const user = await User.findById(decoded.id);
 
-        if (!user) return res.status(410).json({message: 'User deleted.'});
+        if (!user) return res.status(410).json({status: 410, message: 'User deleted.'});
 
         if(decoded.newEmail) {
             await user.verifyNewEmail();
@@ -89,7 +91,7 @@ const verify = async (req,res) => {
 
         res.redirect('/index.html?verified=true');
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({status: 500, message: err.message});
     }
 }
 
