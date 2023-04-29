@@ -1,33 +1,68 @@
 import React, { useContext, useEffect, useRef } from 'react'
-import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Pressable } from 'react-native'
+import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Alert, Pressable } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat';
+import { useTheme } from '@react-navigation/native';
 import { v4 as messageIdGenerator } from 'uuid';
-import { UserContext } from '../contexts/User';
+import { MainContext } from '../contexts/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AlertModal from '../components/AlertModal';
+
 
 const LoginScreen = ({ navigation }) => {
-    const { user, setUser, setMessages, URI } = useContext(UserContext);
+    const { user, setUser, setMessages, config, helpers, setToken } = useContext(MainContext);
     const [email, onChangeEmai] = React.useState('');
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
+
+    const [alertVisible, setAlertVisisble] = React.useState(false);
+    const [alertMessage, setAlertMessage] = React.useState("");
+
     const errorRef = useRef(null);
+    const {colors} = useTheme();
 
-    function convertMessage(message, index) {
-        return {
-            _id: messageIdGenerator(),
-            text: message.content,
-            createdAt: message.createdAt,
-            user: {
-                _id: (message.role == 'user') ? 1 : 2,
-                name: (message.role == 'user') ? this.name : this.personality,
-                avatar: `${URI}/imgs/personalities/${this.personality}.png`
-            }
+    const styles = StyleSheet.create({
+        input: {
+            height: 40,
+            margin: 5,
+            marginHorizontal: 12,
+            borderWidth: 1,
+            borderColor: colors.primary,
+            borderRadius: 20,
+            padding: 10,
+            color: colors.text
+        },
+        button: {
+            height: 40,
+            width: 80,
+            backgroundColor: colors.primary,
+            borderRadius: 20,
+            padding: 10,
+            textAlign: "center",
+            color: colors.primary
+        },
+        buttonText: {
+            color: "#000000"
+        },
+        space: {
+            height: 30,
+            width: 10
+        },
+        error: {
+            color: "red",
+            padding: 10
+        },
+        welcome: {
+            fontSize: 40,
+            fontWeight: "bold",
+            textAlign: "center",
+            color: colors.primary,
+            marginTop: 30
         }
-    }
-
+    });
+    
     async function login() {
         try {
-            const response = await fetch(`${URI}/api/login`, {
+            const response = await fetch(`${config.URI}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -36,20 +71,19 @@ const LoginScreen = ({ navigation }) => {
             });
 
             const result = await response.json();
-
-            console.log(result);
-            console.log("Status: " + result.status);
-
-            if (result.status != 200) {
-                console.log("Message: " + result.message);
-                errorRef.current.innerHTML = result.message;
+            
+            if (response.status != 200) {
+                setAlertMessage(result.message);
+                setAlertVisisble(true);
                 return;
             }
-                setUser(result.user);
-                setMessages(result.messages.reverse().map(convertMessage, result.user));
-                await AsyncStorage.setItem('token', result.token);
 
-                navigation.navigate('Chat');
+            setUser(result.user);
+            setMessages(result.messages.reverse().map(helpers.convertMessage, result.user));
+            setToken(result.token);
+            await AsyncStorage.setItem('token', result.token);
+
+            navigation.navigate('Chat');
         } catch (err) {
             console.log(err);
         }
@@ -57,8 +91,15 @@ const LoginScreen = ({ navigation }) => {
     }
 
     async function register() {
+        //Validate Fields
+        if (email == "" || password == "" || name == "") {
+            setAlertMessage("Please fill out all fields!");
+            setAlertVisisble(true);
+            return;
+        }
+
         try {
-            const response = await fetch(`${URI}/api/register`, {
+            const response = await fetch(`${config.URI}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -68,52 +109,27 @@ const LoginScreen = ({ navigation }) => {
 
             const result = await response.json();
 
-            if (result.status != 200) {
-                console.log("Message: " + result.message);
-                errorRef.current.innerHTML = result.message;
+            if (response.status != 200) {
+                setAlertMessage(result.message);
+                setAlertVisisble(true);
                 return;
             }
 
             setUser(result.user);
-
-            alert("Verify Your Email to Login!");
-
+            setAlertMessage("Success!, Please Check Your Email to Verify!");
+            setAlertVisisble(true);
         } catch (err) {
             console.log(err);
         }
     }
 
-    useEffect(() => {
-        async function getToken() {
-            const JWT = await AsyncStorage.getItem('token');
-            if (JWT) {
-                try {
-                    const response = await fetch(`${URI}/api/protected/user`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${JWT}`
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    setUser(result.user);
-                    setMessages(result.messages.reverse().map(convertMessage, result.user));
-
-                    navigation.navigate('Chat');
-                } catch (err) {
-                    console.log(err);
-                }
-            }
-        }
-        getToken();
-    }, []);
+    useEffect(() => {}, []);
 
 
     return (
         // Everything in one View - Can only return one thing
         <View>
+            <Text style={styles.welcome}>Welcome to PT-GPT!</Text>
             <Text
                 ref={errorRef}
                 style={styles.error}
@@ -130,7 +146,7 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={onChangePassword}
                 value={password}
                 placeholder="Password"
-                keyboardType="numeric"
+                keyboardType="default"
             />
             <TextInput
                 style={styles.input}
@@ -140,42 +156,28 @@ const LoginScreen = ({ navigation }) => {
                 keyboardType="default"
             />
             <View style={{ flexDirection: "row", justifyContent: "center" }}>
-                <Button
-                    title="Login"
+                <Pressable
                     onPress={login}
-                    color="#7A918D"
-                />
+                    style={styles.button}
+                >
+                    <Text style={styles.buttonText}>Login</Text>
+                </Pressable>
                 <View style={styles.space}></View>
-                <Button
-                    title="Register"
+                <Pressable
                     onPress={register}
-                    color="#7A918D"
-                />
+                    style={styles.button}
+                >
+                    <Text style={styles.buttonText}>Register</Text>
+                </Pressable>      
             </View>
+            <AlertModal
+                visible={alertVisible}
+                setVisible={setAlertVisisble}
+                message={alertMessage}
+            ></AlertModal>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-    },
-    button: {
-        height: 40,
-        width: 20,
-        color: "#A18276"
-    },
-    space: {
-        height: 30,
-        width: 30
-    },
-    error: {
-        color: "red",
-        padding: 10
-    }
-});
 
 export default LoginScreen;

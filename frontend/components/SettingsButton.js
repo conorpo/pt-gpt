@@ -7,8 +7,9 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
         padding: 10,
-        opacity: 0.7,
         zIndex: 1,
+        borderRadius: 5,
+        backgroundColor: 'white',
     },
     buttonImage: {
         width: 30,

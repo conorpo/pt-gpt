@@ -1,5 +1,5 @@
 # pt-gpt
-A personal trainer powered by the GPT 4 API, hosted at [pt-gpt.com](https://www.pt-gpt.com)
+A personal trainer powered by the GPT 3 API, hosted at [pt-gpt.com](https://www.pt-gpt.com)
 
 <br />
 

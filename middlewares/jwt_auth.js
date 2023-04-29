@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 module.exports = async (req, res, next) => {
+
     //Authenticates the User based on the JWT token provided in the request header
     const authHeader = req.headers.authorization;
     

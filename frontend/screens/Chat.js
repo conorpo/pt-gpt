@@ -2,11 +2,11 @@ import React, {useState, useCallback, useEffect, useContext} from 'react';
 import { SafeAreaView, Text, TextInput, View, ScrollView, StyleSheet} from 'react-native';
 import SettingsButton from '../components/SettingsButton.js';
 import {v4 as messageIdGenerator} from 'uuid';
-import { GiftedChat } from 'react-native-gifted-chat';
-import { UserContext } from '../contexts/User.js';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { MainContext } from '../contexts/Main.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
-
+import { useTheme } from '@react-navigation/native';
 
 
 const styles = StyleSheet.create({
@@ -23,16 +23,16 @@ const styles = StyleSheet.create({
 
 
 const ChatScreen = ({navigation}) => {
-    const {user, messages, setMessages, URI} = useContext(UserContext);
+    const {user, messages, setMessages, config, helpers, token} = useContext(MainContext);
     const [isTyping, setIsTyping] = useState(false);
+
+    const colors = useTheme().colors;
 
     const onSend = useCallback(async (msgs = []) => {      
         setMessages(previousMessages => GiftedChat.append(previousMessages, msgs))
         try {
             setIsTyping(true);  
-            const token = await AsyncStorage.getItem('token');
-
-            const response = await fetch(`${URI}/api/protected/chat`, {
+            const response = await fetch(`${config.URI}/api/protected/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ const ChatScreen = ({navigation}) => {
                     user: {
                         _id: 2,
                         name: user.personality,
-                        avatar: `${URI}/imgs/personalities/${user.personality}.png`
+                        avatar: `${config.URI}/imgs/personalities/${user.personality}.png`
                     }
                 }]);
             });
@@ -74,9 +74,40 @@ const ChatScreen = ({navigation}) => {
                 messages={messages}
                 onSend={messages => onSend(messages)}
                 user={{
-                    _id: 1,
+                    _id: "user",
                     name: user.name,
                 }}
+                renderBubble={props => {
+                    return (
+                      <Bubble
+                        {...props}
+                        textStyle={{
+                            left: {
+                                color: colors.background
+                            },
+                            right: {
+                                color: colors.background
+                            }
+                        }}
+                        wrapperStyle={{
+                            left: {
+                                backgroundColor: colors.primary
+                            },
+                            right: {
+                                backgroundColor: colors.text
+                            }
+                        }}
+                        timeTextStyle={{
+                            left: {
+                                color: colors.background
+                            },
+                            right: {
+                                color: colors.background
+                            }
+                        }}
+                      />
+                    );
+                  }}
             />            
         </View>
     );

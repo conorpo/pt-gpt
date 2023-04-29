@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { sendNewEmailVerification } = require('../helpers/emailSender');
+const logger = require('../config/logger');
 require('dotenv').config();
 
 const getUser = async (req, res) => {
@@ -23,7 +24,7 @@ const updateUser = async (req, res) => {
     try {
         const user = await User.findById(req.userId);
 
-        if (!user) return res.status(410).json({message: 'User deleted.'});
+        if (!user) return res.status(410).json({status: 410, message: 'User deleted.'});
 
         await user.update(req.body);
         
@@ -31,9 +32,9 @@ const updateUser = async (req, res) => {
             sendNewEmailVerification(req.body.email, user);
         }
 
-        res.status(200).json({message: 'User updated.'});
+        res.status(200).json({status: 200, message: 'User updated.'});
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({status: 500, message: err.message});
     }
 }
 

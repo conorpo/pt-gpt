@@ -4,7 +4,7 @@
     "slug": "pt-gpt",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/imgs/icon.png",
+    "icon": "assets/imgs/logos/favicon/favicon.png",
     "userInterfaceStyle": "light",
     "platforms": [
       "ios",
@@ -17,7 +17,12 @@
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
-      "**/*.{png,jpg,jpeg,gif,svg,ttf,otf,woff,woff2}"
+      "**/*.{png,jpg,jpeg,gif,svg,ttf,otf,woff,woff2}",
+      "./assets/fonts/*.",
+      "./assets/imgs/*.{png}",
+      "./assets/imgs/logos/*.{png}",
+      "./assets/imgs/logos/favicon/*.{png,ico}",
+      "./assets/imgs/personalities/*.{png}"
     ],
     "ios": {
       "supportsTablet": true,
@@ -31,7 +36,7 @@
       "package": "com.conorpo.ptgpt"
     },
     "web": {
-      "favicon": "./assets/imgs/favicon.png"
+      "favicon": "./assets/imgs/logos/favicon/favicon-32x32.png"
     },
     "extra": {
       "eas": {
