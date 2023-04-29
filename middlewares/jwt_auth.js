@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
+const logger = require('../config/logger');
 require('dotenv').config();
 
 module.exports = async (req, res, next) => {
-
     //Authenticates the User based on the JWT token provided in the request header
     const authHeader = req.headers.authorization;
-    
     if(!authHeader) return res.status(401).json({msg: 'No JWT token provided'});
     
     const token = authHeader.split(' ')[1];

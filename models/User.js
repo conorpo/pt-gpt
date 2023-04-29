@@ -13,7 +13,7 @@ const UserSchema = new Schema({
     age: Number,
     height: Number,
     weight: Number,
-    metric: {type: Boolean, default: false},
+    units: {type: String, enum:['Metric', 'Imperial'], default: 'Metric'},
     
     sports: String,
     goals: String,
@@ -39,7 +39,7 @@ UserSchema.methods.split = function() {
             age: this.age,
             height: this.height,
             weight: this.weight,
-            metric: this.metric,
+            units: this.units,
 
             goals: this.goals,
             sports: this.sports,
@@ -60,7 +60,7 @@ UserSchema.methods.verifyNewEmail = function(){
     this.save();
 }
 
-UserSchema.methods.update = function(updatedData) {
+UserSchema.methods.update = async function(updatedData) {
     this.name = updatedData.name || this.name;
     this.next_email = updatedData.email || this.email;
     this.pronouns = updatedData.pronouns || this.pronouns;
@@ -68,22 +68,22 @@ UserSchema.methods.update = function(updatedData) {
     this.age = updatedData.age || this.age;
     this.height = updatedData.height || this.height;
     this.weight = updatedData.weight || this.weight;
-    this.metric = updatedData.metric;
+    this.units = updatedData.units || "Metric";
 
     this.sports = updatedData.sports || this.sports;
     this.goals = updatedData.goals || this.goals;
 
     this.personality = updatedData.personality || this.personality;
-
     
     const updated = (this.updated_at != null) ? ' (updated)' : '';
     this.messages.push({
         role: 'system',
-        content: `Assigned User Info${updated}:\n\nName: ${this.name}\nPronouns: ${this.pronouns}\nHeight: ${this.height + (this.metric ? ' cm' : ' in')}\nWeight: ${this.weight + (this.metric ? ' kg' : ' lbs')}\nSports: ${this.sports}\nGoals (written by User): ${this.goals}\n\nYour User has chosen the following personality for you: ${this.personality}\nTry to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting. Feel free to use the User's name, pronouns, or any other info in responses. Please stay in character, talk like your character and don't say you are an AI.`
+        content: `Assigned User Info${updated}:\n\nName: ${this.name}\nPronouns: ${this.pronouns}\nHeight: ${this.height + (this.units.localeCompare("Metric") ? ' cm' : ' in')}\nWeight: ${this.weight + (this.units.localeCompare("Metric") ? ' kg' : ' lbs')}\nSports: ${this.sports}\nGoals (written by User): ${this.goals}\n\nYour User has chosen the following personality for you: ${this.personality}\nTry to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting. Feel free to use the User's name, pronouns, or any other info in responses. Please stay in character, talk like your character and don't say you are an AI.`
     });
+    this.markModified('messages');
 
     this.updated_at = Date.now();
-    this.save();
+    return this.save();
 }
 
 

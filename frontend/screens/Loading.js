@@ -26,16 +26,17 @@ const LoadingScreen = ({ navigation, convertMessage}) => {
                     }
                 });
                 
+                const result = await response.json();
                 if(String(response.status.toString()).startsWith('4')) throw('Invalid token')
 
-                const result = await response.json();
 
                 setUser(result.user);
                 setMessages(result.messages.reverse().map(helpers.convertMessage, result.user)); 
                 navigation.navigate('Chat');
             } catch (err) {
                 console.log(err)
-                AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('token');
+                console.log("Removed token.")
 
                 navigation.navigate('Login');
             }

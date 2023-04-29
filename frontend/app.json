@@ -36,7 +36,7 @@
       "package": "com.conorpo.ptgpt"
     },
     "web": {
-      "favicon": "./assets/imgs/logos/favicon/favicon-32x32.png"
+      "favicon": "./assets/imgs/logos/favicon/favicon-32.png"
     },
     "extra": {
       "eas": {

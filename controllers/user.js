@@ -27,6 +27,8 @@ const updateUser = async (req, res) => {
         if (!user) return res.status(410).json({status: 410, message: 'User deleted.'});
 
         await user.update(req.body);
+
+        console.log(user.messages)
         
         if(req.body.email && req.body.email !== user.email) {
             sendNewEmailVerification(req.body.email, user);

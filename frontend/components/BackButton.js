@@ -17,12 +17,12 @@ const styles = StyleSheet.create({
     },
 })
 
-const SettingsButton = ({ navigation}) => {
+const BackButton = ({ navigation}) => {
     return (
-        <Pressable style={styles.button} onPress={() => navigation.navigate('Profile')}>
-            <Image style={styles.buttonImage} source={require('./icons8-settings.svg')} />
+        <Pressable style={styles.button} onPress={() => navigation.goBack()}>
+            <Image style={styles.buttonImage} source={require('./Back_Icon.svg')} />
         </Pressable>
     )
 }
 
-export default SettingsButton;
+export default BackButton;
