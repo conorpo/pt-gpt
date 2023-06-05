@@ -3,7 +3,6 @@ import { StyleSheet, Image } from 'react-native';
 import { DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
 
-
 //Screens
 import ChatScreen from './screens/Chat.js';
 import ProfileScreen from './screens/Profile.js';

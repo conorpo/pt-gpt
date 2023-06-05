@@ -4,12 +4,20 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import { useTheme } from '@react-navigation/native';
 import { v4 as messageIdGenerator } from 'uuid';
 import { MainContext } from '../contexts/Main';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import AlertModal from '../components/AlertModal';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+
+const ErrorMessages = {
+    "auth/invalid-email": "Invalid email address",
+    "auth/user-disabled": "User disabled",
+    "auth/user-not-found": "User not found",
+    "auth/wrong-password": "Wrong password",
+    "auth/email-already-in-use": "Email already in use",
+};
 
 
 const LoginScreen = ({ navigation }) => {
-    const { user, setUser, setMessages, config, helpers, setToken } = useContext(MainContext);
+    const { user, setUser, setMessages, config, helpers, setToken, auth } = useContext(MainContext);
     const [email, onChangeEmai] = React.useState('');
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
@@ -62,16 +70,7 @@ const LoginScreen = ({ navigation }) => {
     
     async function login() {
         try {
-            const response = await fetch(`${config.URI}/api/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const result = await response.json();
-            
+            await signInWithEmailAndPassword(auth, email, password);
             if (response.status != 200) {
                 setAlertMessage(result.message);
                 setAlertVisisble(true);
@@ -81,10 +80,11 @@ const LoginScreen = ({ navigation }) => {
             setUser(result.user);
             setMessages(result.messages.reverse().map(helpers.convertMessage, result.user));
             setToken(result.token);
-            await AsyncStorage.setItem('token', result.token);
 
             navigation.navigate('Chat');
         } catch (err) {
+            setAlertMessage(ErrorMessages[err.code] || err.message || "Unknown Error");
+            setAlertVisisble(true);
             console.log(err);
         }
 
@@ -99,27 +99,18 @@ const LoginScreen = ({ navigation }) => {
         }
 
         try {
-            const response = await fetch(`${config.URI}/api/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password, name })
+            const {user} = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(user, {
+                displayName: name
             });
 
-            const result = await response.json();
-
-            if (response.status != 200) {
-                setAlertMessage(result.message);
-                setAlertVisisble(true);
-                return;
-            }
-
-            setUser(result.user);
+            setUser(auth.currentUser);
             setAlertMessage("Success!, Please Check Your Email to Verify!");
             setAlertVisisble(true);
         } catch (err) {
             console.log(err);
+            setAlertMessage(ErrorMessages[err.code] || err.message || "Unknown Error");
+            setAlertVisisble(true);
         }
     }
 
