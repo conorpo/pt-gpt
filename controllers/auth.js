@@ -75,7 +75,7 @@ const register = async (req,res) => {
             user: userSafe,
             messages
         })
-    } catch (err) {
+    } catch (err) {a
         logger.error(err.message)
         res.status(500).json({status: 500, message: "Server Error (Probably Something on Our End)"});
     }
