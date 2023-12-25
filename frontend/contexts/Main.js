@@ -1,38 +1,26 @@
-import {createContext, useEffect, useState} from 'react';
-import {v4 as messageIdGenerator} from 'uuid';
+import {createContext, useState, useContext, useEffect} from 'react';
+import {app} from '../config/firebaseConfig';
 
 const MainContext = createContext();
 
-const MainProvider = ({children}) => {
-    const [user, setUser] = useState(null);
+export const MainProvider = ({children}) => {
+    const [authUser, setAuthUser] = useState(null); // Firebase Auth User
+    const [profile, setProfile] = useState(null); // Firestore User Profile
     const [messages, setMessages] = useState([]);
-    const [token, setToken] = useState(null);
+    const [token, setToken] = useState(null); 
 
-    const config = {
-        URI : (__DEV__ == true) ? 'http://localhost:3000' : 'https://pt-gpt.com',
-    }
-
-    const helpers = {
-        messageIdGenerator,
-        convertMessage: function(message) {
-            console.log(this);
-            return {
-                _id: messageIdGenerator(),
-                text: message.content,
-                createdAt: message.createdAt,
-                user: {
-                    _id: message.role,
-                    name: (message.role == 'user') ? this.name : this.personality,
-                    avatar: `${config.URI}/imgs/personalities/${this.personality}.png`
-                }
-            };
+    useEffect(() => {
+        if(!authUser) {
+            setProfile(null);
+            setMessages([]);
         }
-    }    
+    }, [authUser]);
+
     return (
-        <MainContext.Provider value={{token, setToken, user, setUser, messages, setMessages, config, helpers}}>
+        <MainContext.Provider value={{authUser, setAuthUser, profile, setProfile, messages, setMessages, token, setToken}}>
             {children}
         </MainContext.Provider>
     )
 };
 
-export {MainContext, MainProvider};
+export const useMainContext = () => useContext(MainContext);

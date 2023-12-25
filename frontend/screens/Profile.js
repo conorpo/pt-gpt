@@ -1,42 +1,33 @@
-import React, { useContext } from "react";
+import {useEffect, useState} from "react";
 import { Button, View, StyleSheet, TextInput, Text, Pressable, Image} from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AlertModal from '../components/AlertModal';
 import SelectDropdown from 'react-native-select-dropdown'
-
-import { MainContext } from '../contexts/Main';
 import { useTheme } from '@react-navigation/native';
 
+import { useMainContext } from '../contexts/Main';
+
 import BackButton from '../components/BackButton';
+
+import authService from "../services/authService";
+import profileService from "../services/profileService";
+import { set } from "mongoose";
 
 const unitOptions = ["Metric", "Imperial"];
 const personalityOptions = ["AI", "Cthulhu", "Dracula", "Hercules", "Mickey Mouse", "Popeye", "Robin Hood", "Sherlock", "Tarzan", "Thor", "Zorro"];
 
-
-
 const ProfileScreen = ({ navigation }) => {
-    const { user, setUser, setMessages, config, helpers, token, setToken} = useContext(MainContext);
+    const { authUser, profile } = useMainContext();
     
-    const [info, setInfo] = React.useState({
-        name: user.name || '',
-        email: user.email || '',
-        pronouns: user.pronouns || '',
+    const [localProfile, setLocalProfile] = useState({});
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [difference, setDifference] = useState({});
 
-        age: user.age || '',
-        weight: user.weight || '',
-        height: user.height || '',
-        units: user.units || '',
-        
-        sports: user.sports || '',
-        goals: user.goals || '',
-        
-        personality: user.personality || '',
-    });//[name, email, unit, personality]
     const [alertVisible, setAlertVisisble] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState("");
 
     const colors = useTheme().colors;
-
 
     const styles = StyleSheet.create({
         entry: {
@@ -65,42 +56,70 @@ const ProfileScreen = ({ navigation }) => {
             padding: 1,
             textAlign: "center",
         },
+        disabledButton: {
+            backgroundColor: "#00000022",
+            pointerEvents: "none"
+        },
         buttonText: {
             //fontSize: 10,
             color: "#000000"
         }
     });
 
+    function initializeLocalState() {
+        setLocalProfile({
+            pronouns: profile.pronouns || '',
+            age: profile.age || '',
+            weight: profile.weight || '',
+            height: profile.height || '',
+            units: profile.units || '',
+            sports: profile.sports || '',
+            goals: profile.goals || '',
+            personality: profile.personality || '',
+        });
+        setName(authUser.name || '');
+        setEmail(authUser.email || '');
+        setDifference({
+            name: false,
+            email: false,
+            profile: false
+        })
+    }
+    useEffect(initializeLocalState, [profile, authUser]); // Whenever profile or authUser changes, update local state
+
+    useEffect(() => {
+        setDifference({
+            ...difference,
+            name: name.localeCompare(authUser.name) != 0
+        })
+    }, [name]); // Whenever state changes, check if there are pending changes
+    useEffect(() => {
+        setDifference({
+            ...difference,
+            email: email.localeCompare(authUser.email) != 0
+        })
+    }, [email]); // Whenever state changes, check if there are pending changes
+    useEffect(() => {
+        setDifference({
+            ...difference,
+            profile: Object.keys(localProfile).some(key => localProfile[key] != profile[key])
+        })
+    }, [localProfile]); // Whenever state changes, check if there are pending changes
+    
     async function update() {
-
         try {
-            const response = await fetch(`${config.URI}/api/protected/user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(info)
-            });
-
-            const result = await response.json();
-            
-            if (response.status != 200) {
-                setAlertMessage(response.status + ": " + result.message);
-                setAlertVisisble(true);
-                return;
-            }
-            setAlertMessage(result.message);
-            setAlertVisisble(true);
-            
+            if(difference.name) await authService.updateProfile({displayName: name});
+            if(difference.email) await authService.updateEmail(email);
+            if(difference.profile) await profileService.updateProfile(localProfile);          
         } catch (err) {
-            console.log(err);
+            setAlertMessage(err.message);
+            setAlertVisisble(true);
         }
-
     }
 
     async function logout(){
-        await AsyncStorage.removeItem('token');
+        await authService.signOut();
+        //await AsyncStorage.removeItem('token');
         navigation.navigate('Login');
     }
 
@@ -300,6 +319,17 @@ const ProfileScreen = ({ navigation }) => {
                     marginVertical: 5,
                 }}
             />
+
+            <Pressable
+                onPress={initializeLocalState}
+                style={[
+                    styles.button,
+                    Object.values(difference).every((value) => !value) && styles.disabledButton
+                ]}
+                disabled={Object.values(difference).every((value) => !value)}
+            >
+                <Text style={styles.buttonText}>Undo Changes</Text>
+            </Pressable>
 
             <Pressable
                 onPress={update}

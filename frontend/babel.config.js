@@ -3,9 +3,12 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo',
               '@babel/preset-env',
-              // '@babel/preset-react'
+              '@babel/preset-react'
             ],
-
-    plugins: ['@babel/plugin-syntax-jsx']
+    plugins: [
+      ["@babel/plugin-proposal-private-property-in-object", { "loose": true }],
+      ["@babel/plugin-proposal-class-properties", { "loose": true }],
+      ["@babel/plugin-proposal-private-methods", { "loose": true }]
+    ]
   };
 };

@@ -5,7 +5,7 @@ import { v4 as messageIdGenerator } from 'uuid';
 import { MainContext } from '../contexts/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LoadingScreen = ({ navigation, convertMessage}) => {
+const LoadingScreen = ({ navigation }) => {
     const { user, setUser, setMessages, config, helpers, setToken} = useContext(MainContext);
 
     useEffect(() => {

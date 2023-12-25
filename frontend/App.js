@@ -1,8 +1,10 @@
-import React ,{ useEffect, useContext } from 'react';
+import React from 'react';
 import { StyleSheet, Image } from 'react-native';
 import { DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
 
+//Initialize Firebase
+import _ from './config/firebaseConfig';
 
 //Screens
 import ChatScreen from './screens/Chat.js';
@@ -19,12 +21,13 @@ const DarkTheme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#ffc904', //UCF Golf
+    primary: '#ffc904', //UCF Gold
     background: '#222222',
     text: '#ffffff',
     border: '#1a1a1a',
   },
 }
+
 const App = () => {
   return (
     <MainProvider>

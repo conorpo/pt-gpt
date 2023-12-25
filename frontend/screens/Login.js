@@ -1,23 +1,25 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React from 'react'
 import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Alert, Pressable } from 'react-native'
-import { GiftedChat } from 'react-native-gifted-chat';
 import { useTheme } from '@react-navigation/native';
-import { v4 as messageIdGenerator } from 'uuid';
-import { MainContext } from '../contexts/Main';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AlertModal from '../components/AlertModal';
 
+import { useMainContext } from '../contexts/Main';
+
+import authService from '../services/authService'; 
+import profileService from '../services/profileService';
 
 const LoginScreen = ({ navigation }) => {
-    const { user, setUser, setMessages, config, helpers, setToken } = useContext(MainContext);
-    const [email, onChangeEmai] = React.useState('');
+    const { setUser, setMessages, setToken } = useMainContext();
+
+    const [email, onChangeEmail] = React.useState('');
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
 
+    //TODO: Put this onto the AlertModal somehow
     const [alertVisible, setAlertVisisble] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState("");
 
-    const errorRef = useRef(null);
     const {colors} = useTheme();
 
     const styles = StyleSheet.create({
@@ -47,10 +49,6 @@ const LoginScreen = ({ navigation }) => {
             height: 30,
             width: 10
         },
-        error: {
-            color: "red",
-            padding: 10
-        },
         welcome: {
             fontSize: 40,
             fontWeight: "bold",
@@ -59,72 +57,35 @@ const LoginScreen = ({ navigation }) => {
             marginTop: 30
         }
     });
-    
-    async function login() {
+
+    async function loginHandler() {
         try {
-            const response = await fetch(`${config.URI}/api/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const result = await response.json();
-            
-            if (response.status != 200) {
-                setAlertMessage(result.message);
-                setAlertVisisble(true);
-                return;
-            }
-
-            setUser(result.user);
-            setMessages(result.messages.reverse().map(helpers.convertMessage, result.user));
-            setToken(result.token);
-            await AsyncStorage.setItem('token', result.token);
+            await authService.login(email, password);
+            await profileService.getProfileDoc();
+            //await messageService.getMessages();
 
             navigation.navigate('Chat');
         } catch (err) {
             console.log(err);
+            setAlertMessage(err.message);
+            setAlertVisisble(true);
         }
-
     }
 
-    async function register() {
-        //Validate Fields
-        if (email == "" || password == "" || name == "") {
-            setAlertMessage("Please fill out all fields!");
-            setAlertVisisble(true);
-            return;
-        }
-
+    async function registerHandler() {
         try {
-            const response = await fetch(`${config.URI}/api/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password, name })
-            });
-
-            const result = await response.json();
-
-            if (response.status != 200) {
-                setAlertMessage(result.message);
-                setAlertVisisble(true);
-                return;
-            }
-
-            setUser(result.user);
+            await authService.register(email, password, name); //Fields are validated in authService
+            await profileService.setProfileDoc();
+            //await messageService.getMessages();
+            
             setAlertMessage("Success!, Please Check Your Email to Verify!");
             setAlertVisisble(true);
         } catch (err) {
             console.log(err);
+            setAlertMessage(err.message);
+            setAlertVisisble(true);
         }
     }
-
-    useEffect(() => {}, []);
-
 
     return (
         // Everything in one View - Can only return one thing
@@ -136,7 +97,7 @@ const LoginScreen = ({ navigation }) => {
             />
             <TextInput
                 style={styles.input}
-                onChangeText={onChangeEmai}
+                onChangeText={onChangeEmail}
                 value={email}
                 placeholder="Email"
                 keyboardType="default"
@@ -157,14 +118,14 @@ const LoginScreen = ({ navigation }) => {
             />
             <View style={{ flexDirection: "row", justifyContent: "center" }}>
                 <Pressable
-                    onPress={login}
+                    onPress={loginHandler}
                     style={styles.button}
                 >
                     <Text style={styles.buttonText}>Login</Text>
                 </Pressable>
                 <View style={styles.space}></View>
                 <Pressable
-                    onPress={register}
+                    onPress={registerHandler}
                     style={styles.button}
                 >
                     <Text style={styles.buttonText}>Register</Text>
