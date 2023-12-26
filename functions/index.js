@@ -3,7 +3,6 @@ const {logger} = require("firebase-functions/v2");
 const {getFirestore} = require("firebase-admin/firestore");
 
 const openai = require('../config/openai_connection');
-const { get } = require("mongoose");
 
 const SYSTEM_MESSAGE = {
     role: 'system',
