@@ -99,18 +99,21 @@ module.exports = User;
 */
 
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { useMainContext } from "../contexts/Main";
 
 const db = getFirestore();
 
-const { user, profile, setProfile } = useMainContext();
+const { profile, setProfile } = useMainContext();
+
+const auth = getAUth();
 
 export default {
     setProfileDoc: async (profile_data={}) => {
         profile_data.units = profile_data.units || "Metric";
         profile_data.personality = profile_data.personality || "AI";
 
-        const profileRef = doc(db, "profiles", user.uid);
+        const profileRef = doc(db, "profiles", auth.currentUser.uid);
         await setDoc(profileRef, profile_data); //Update profile in firestore
 
         // Pessimistic update, because profile UI updates realtime anyway, and we want context to reflect what's in the database
@@ -120,12 +123,13 @@ export default {
         });
     },
     getProfileDoc: async () => {
-        const profileRef = doc(db, "profiles", user.uid);
+        const profileRef = doc(db, "profiles", auth.currentUser.uid);
         const profileDoc = await getDoc(profileRef);
 
-        if (!profileDoc.exists()) throw new Error("Profile does not exist!");
-
-        setProfile(profileDoc.data());
-        return profileDoc.data();
+        if (!profileDoc.exists()) {
+            setProfileDoc(); // If profile doesn't exist, create it
+        } else {
+            setProfile(profileDoc.data());
+        }
     }
 };

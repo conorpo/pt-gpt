@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { SafeAreaView, Text, TextInput, View, StyleSheet, Button, Alert, Pressable } from 'react-native'
 import { useTheme } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,16 +9,14 @@ import { useMainContext } from '../contexts/Main';
 import authService from '../services/authService'; 
 import profileService from '../services/profileService';
 
-const LoginScreen = ({ navigation }) => {
-    const { setUser, setMessages, setToken } = useMainContext();
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
+const LoginScreen = ({ navigation }) => {
     const [email, onChangeEmail] = React.useState('');
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
 
-    //TODO: Put this onto the AlertModal somehow
-    const [alertVisible, setAlertVisisble] = React.useState(false);
-    const [alertMessage, setAlertMessage] = React.useState("");
+    const { showAlertModal } = useMainContext();
 
     const {colors} = useTheme();
 
@@ -58,37 +56,41 @@ const LoginScreen = ({ navigation }) => {
         }
     });
 
-    async function loginHandler() {
+    const loginListener = onAuthStateChanged(getAuth(), async (user) => {
         try {
-            await authService.login(email, password);
             await profileService.getProfileDoc();
-            //await messageService.getMessages();
-
+            await messageService.getMessagesDoc();
             navigation.navigate('Chat');
         } catch (err) {
             console.log(err);
-            setAlertMessage(err.message);
-            setAlertVisisble(true);
+            showAlertModal(err.message);
+        }
+    });
+
+    async function loginHandler() {
+        try {
+            await authService.login(email, password);
+        } catch (err) {
+            console.log(err);
+            showAlertModal(err.message);
         }
     }
 
     async function registerHandler() {
         try {
+            loginListener(); // Remove the listener so that it doesn't fire when we register
             await authService.register(email, password, name); //Fields are validated in authService
             await profileService.setProfileDoc();
-            //await messageService.getMessages();
-            
-            setAlertMessage("Success!, Please Check Your Email to Verify!");
-            setAlertVisisble(true);
+            await messageService.setMessagesDoc();
+           
+            showAlertModal("Please check your email for a verification link!");
         } catch (err) {
             console.log(err);
-            setAlertMessage(err.message);
-            setAlertVisisble(true);
+            showAlertModal(err.message);
         }
     }
 
     return (
-        // Everything in one View - Can only return one thing
         <View>
             <Text style={styles.welcome}>Welcome to PT-GPT!</Text>
             <Text
@@ -131,11 +133,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.buttonText}>Register</Text>
                 </Pressable>      
             </View>
-            <AlertModal
-                visible={alertVisible}
-                setVisible={setAlertVisisble}
-                message={alertMessage}
-            ></AlertModal>
+            <AlertModal></AlertModal>
         </View>
     );
 }

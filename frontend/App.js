@@ -10,7 +10,6 @@ import _ from './config/firebaseConfig';
 import ChatScreen from './screens/Chat.js';
 import ProfileScreen from './screens/Profile.js';
 import LoginScreen from './screens/Login.js';
-import LoadingScreen from './screens/Loading.js';
 
 //User Context
 import {MainProvider} from './contexts/Main.js';
@@ -33,7 +32,7 @@ const App = () => {
     <MainProvider>
       <NavigationContainer theme={DarkTheme}>
         <Stack.Navigator 
-          initialRouteName="Loading"
+          initialRouteName="Login"
           screenOptions={{
             headerShown: false,
             // headerBackground: () => (
@@ -59,10 +58,6 @@ const App = () => {
           <Stack.Screen 
             name="Login" 
             component={LoginScreen} 
-          />
-          <Stack.Screen
-            name="Loading"
-            component={LoadingScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

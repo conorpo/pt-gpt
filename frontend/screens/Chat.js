@@ -9,24 +9,26 @@ import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
 import { useTheme } from '@react-navigation/native';
 
 
-const styles = StyleSheet.create({
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-    },
-    view: {
-        flex: 1,
-    }
-  });
+
 
 
 const ChatScreen = ({navigation}) => {
-    const {user, messages, setMessages, config, helpers, token} = useContext(MainContext);
+    const {} = useContext(MainContext);
     const [isTyping, setIsTyping] = useState(false);
 
     const colors = useTheme().colors;
+
+    const styles = StyleSheet.create({
+        input: {
+            height: 40,
+            margin: 12,
+            borderWidth: 1,
+            padding: 10,
+        },
+        view: {
+            flex: 1,
+        }
+      });
 
     const onSend = useCallback(async (msgs = []) => {      
         setMessages(previousMessages => GiftedChat.append(previousMessages, msgs))
@@ -64,7 +66,6 @@ const ChatScreen = ({navigation}) => {
     return (
         <View style={styles.view}>
             <SettingsButton navigation={navigation} />
-          
 
             {/* This will house the ChatGPT responses + past user queries */}
             <GiftedChat

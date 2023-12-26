@@ -11,21 +11,22 @@ import BackButton from '../components/BackButton';
 
 import authService from "../services/authService";
 import profileService from "../services/profileService";
-import { set } from "mongoose";
 
 const unitOptions = ["Metric", "Imperial"];
 const personalityOptions = ["AI", "Cthulhu", "Dracula", "Hercules", "Mickey Mouse", "Popeye", "Robin Hood", "Sherlock", "Tarzan", "Thor", "Zorro"];
 
+
 const ProfileScreen = ({ navigation }) => {
-    const { authUser, profile } = useMainContext();
+    const { profile } = useMainContext();
     
+    const auth = getAuth();
+
     const [localProfile, setLocalProfile] = useState({});
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [difference, setDifference] = useState({});
 
-    const [alertVisible, setAlertVisisble] = React.useState(false);
-    const [alertMessage, setAlertMessage] = React.useState("");
+    const {showAlertModal} = useMainContext();
 
     const colors = useTheme().colors;
 
@@ -77,26 +78,26 @@ const ProfileScreen = ({ navigation }) => {
             goals: profile.goals || '',
             personality: profile.personality || '',
         });
-        setName(authUser.name || '');
-        setEmail(authUser.email || '');
+        setName(auth.currentUser.displayName || '');
+        setEmail(auth.currentUser.email || '');
         setDifference({
             name: false,
             email: false,
             profile: false
         })
     }
-    useEffect(initializeLocalState, [profile, authUser]); // Whenever profile or authUser changes, update local state
+    useEffect(initializeLocalState, [profile]); // Whenever profile changes, update local state
 
     useEffect(() => {
         setDifference({
             ...difference,
-            name: name.localeCompare(authUser.name) != 0
+            name: name.localeCompare(auth.currentUser.displayName) != 0
         })
     }, [name]); // Whenever state changes, check if there are pending changes
     useEffect(() => {
         setDifference({
             ...difference,
-            email: email.localeCompare(authUser.email) != 0
+            email: email.localeCompare(auth.currentUser.email) != 0
         })
     }, [email]); // Whenever state changes, check if there are pending changes
     useEffect(() => {
@@ -112,14 +113,13 @@ const ProfileScreen = ({ navigation }) => {
             if(difference.email) await authService.updateEmail(email);
             if(difference.profile) await profileService.updateProfile(localProfile);          
         } catch (err) {
-            setAlertMessage(err.message);
-            setAlertVisisble(true);
+            console.log(err);
+            showAlertModal(err.message);
         }
     }
 
     async function logout(){
         await authService.signOut();
-        //await AsyncStorage.removeItem('token');
         navigation.navigate('Login');
     }
 
@@ -347,11 +347,7 @@ const ProfileScreen = ({ navigation }) => {
             </Pressable>
 
             
-            <AlertModal
-                visible={alertVisible}
-                setVisible={setAlertVisisble}
-                message={alertMessage}
-            ></AlertModal>
+            <AlertModal></AlertModal>
         </View>
     );
 }
