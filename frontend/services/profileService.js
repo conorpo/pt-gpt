@@ -127,7 +127,7 @@ export default {
         const profileDoc = await getDoc(profileRef);
 
         if (!profileDoc.exists()) {
-            setProfileDoc(); // If profile doesn't exist, create it
+            await setProfileDoc(); // If profile doesn't exist, create it
         } else {
             setProfile(profileDoc.data());
         }
