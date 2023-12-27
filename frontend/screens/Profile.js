@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Button, View, StyleSheet, TextInput, Text, Pressable, Image} from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AlertModal from '../components/AlertModal';
@@ -10,6 +10,7 @@ import { useMainContext } from '../contexts/Main';
 import BackButton from '../components/BackButton';
 
 import authService from "../services/authService";
+import { getAuth } from "firebase/auth";
 import profileService from "../services/profileService";
 
 const unitOptions = ["Metric", "Imperial"];
@@ -20,10 +21,23 @@ const ProfileScreen = ({ navigation }) => {
     
     const auth = getAuth();
 
-    const [localProfile, setLocalProfile] = useState({});
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [difference, setDifference] = useState({});
+    const [localProfile, setLocalProfile] = useState({
+        pronouns: profile.pronouns || '',
+        age: profile.age || '',
+        weight: profile.weight || '',
+        height: profile.height || '',
+        units: profile.units || '',
+        sports: profile.sports || '',
+        goals: profile.goals || '',
+        personality: profile.personality || '',
+    });
+    const [name, setName] = useState(auth.currentUser.displayName || '');
+    const [email, setEmail] = useState(auth.currentUser.email || '');
+    const [difference, setDifference] = useState({
+        name: false,
+        email: false,
+        profile: false
+    });
 
     const {showAlertModal} = useMainContext();
 
@@ -144,8 +158,8 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.space}></View>
                 <TextInput
                     style={styles.input}
-                    onChangeText={(string) => setInfo({ ...info, name: string })}
-                    value={info.name}
+                    onChangeText={(string) => setName(string)}
+                    value={name}
                 />
             </View>            
             <View style={styles.entry}>
@@ -153,8 +167,8 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.space}></View>
                 <TextInput
                     style={styles.input}
-                    onChangeText={(string) => setInfo({ ...info, pronouns: string })}
-                    value={info.pronouns}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, pronouns: string })}
+                    value={localProfile.pronouns}
                 />
             </View>
             <View style={styles.entry}>
@@ -162,8 +176,8 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.space}></View>
                 <TextInput
                     style={styles.input}
-                    onChangeText={(string) => setInfo({ ...info, email: string })}
-                    value={info.email}
+                    onChangeText={(string) => setEmail(string)}
+                    value={email}
                 />
             </View>
 
@@ -182,8 +196,8 @@ const ProfileScreen = ({ navigation }) => {
                 <TextInput
                     style={styles.input}
                     //keyboardType='numeric'
-                    onChangeText={(string) => setInfo({ ...info, age: string })}
-                    value={info.age}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, age: string })}
+                    value={localProfile.age}
                     maxLength={3}
                 />
             </View>
@@ -197,15 +211,15 @@ const ProfileScreen = ({ navigation }) => {
                         flex: 2
                     }}
                     //keyboardType='numeric'
-                    onChangeText={(string) => setInfo({ ...info, weight: string })}
-                    value={info.weight}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, weight: string })}
+                    value={localProfile.weight}
                     maxLength={3}
                 />
                 <Text style={{
                     ...styles.label,
                     textAlign: "left"
                 }}>{
-                    info.units == "Metric" ? "kg" : "lbs"
+                    localProfile.units == "Metric" ? "kg" : "lbs"
                 }</Text>
             </View>
 
@@ -218,15 +232,15 @@ const ProfileScreen = ({ navigation }) => {
                         flex: 2
                     }}
                     //keyboardType='numeric'
-                    onChangeText={(string) => setInfo({ ...info, height: string })}
-                    value={info.height}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, height: string })}
+                    value={localProfile.height}
                     maxLength={3}
                 />
                 <Text style={{
                     ...styles.label,
                     textAlign: "left"
                 }}>{
-                    info.units == "Metric" ? "cm" : "in"
+                    localProfile.units == "Metric" ? "cm" : "in"
                 }</Text>
             </View>
             
@@ -239,9 +253,9 @@ const ProfileScreen = ({ navigation }) => {
                 <SelectDropdown
                     data={unitOptions}
                     onSelect={(selectedItem, index) => {
-                        setInfo({ ...info, units: selectedItem });
+                        setLocalProfile({ ...localProfile, units: selectedItem });
                     }}
-                    defaultButtonText={info.units}
+                    defaultButtonText={localProfile.units}
                     buttonTextAfterSelection={(selectedItem, index) => {
                         return selectedItem;
                     }}
@@ -266,8 +280,8 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.space}></View>
                 <TextInput
                     style={styles.input}
-                    onChangeText={(string) => setInfo({ ...info, sports: string })}
-                    value={info.sports}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, sports: string })}
+                    value={localProfile.sports}
                 />
             </View>
 
@@ -276,8 +290,8 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.space}></View>
                 <TextInput
                     style={styles.input}
-                    onChangeText={(string) => setInfo({ ...info, goals: string })}
-                    value={info.goals}
+                    onChangeText={(string) => setLocalProfile({ ...localProfile, goals: string })}
+                    value={localProfile.goals}
                 />
             </View>
 
@@ -298,9 +312,9 @@ const ProfileScreen = ({ navigation }) => {
                 <SelectDropdown
                     data={personalityOptions}
                     onSelect={(selectedItem, index) => {
-                        setInfo({ ...info, personality: selectedItem });
+                        setLocalProfile({ ...localProfile, personality: selectedItem });
                     }}
-                    defaultButtonText={info.personality}
+                    defaultButtonText={localProfile.personality}
                     buttonTextAfterSelection={(selectedItem, index) => {
                         return selectedItem;
                     }}

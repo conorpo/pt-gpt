@@ -23,10 +23,12 @@ const systemMessage = {
     content: SYSTEM_MESSAGE_STR || "You are bot, listen to human."
 };
 
-let openai = null;
-
-exports.chat = onCall(async request => {
+exports.chat = onCall({secrets: [OPENAI_API_KEY]}, async request => {
     try {
+        const openai = new OpenAI({
+            apiKey: OPENAI_API_KEY.value(),
+            organization: OPENAI_ORGANIZATION.value()
+        })
         if(!openai) throw new HttpsError('unavailable', 'OpenAI is not initialized.');
 
         const uid = request.auth.uid;
@@ -100,11 +102,3 @@ exports.setupNewUser = functions.auth.user().onCreate(async (user) => {
     await getFirestore().collection('profiles').doc(user.uid).set({personality: 'AI', units: 'Metric'});
     await getFirestore().collection('messages').doc(user.uid).set({messages: []});
 });
-
-exports.onConfigUpdated = onConfigUpdated({secrets: [OPENAI_API_KEY]},(snapshot) => {
-    openai = new OpenAI({
-        apiKey: OPENAI_API_KEY.value(),
-        organization: OPENAI_ORGANIZATION.value()
-    });
-});
-

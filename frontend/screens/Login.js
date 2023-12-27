@@ -53,7 +53,7 @@ const LoginScreen = ({ navigation }) => {
             width: 10
         },
         welcome: {
-            fontSize: 40,
+            fontSize: "8vw",
             fontWeight: "bold",
             textAlign: "center",
             color: colors.primary,
