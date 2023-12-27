@@ -66,7 +66,8 @@ const LoginScreen = ({ navigation }) => {
             if (!user) return;
             try {
                 await profileService.getProfileDoc(setProfile);
-                await messageService.getMessagesDoc(setMessages);
+                //await messageService.getMessagesDoc(setMessages);
+                // doing this in Chat.js now, had some react issues
                 navigation.navigate('Chat');
             } catch (err) {
                 console.log(err);

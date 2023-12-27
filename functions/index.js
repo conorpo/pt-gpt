@@ -1,7 +1,7 @@
 const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const functions = require("firebase-functions");
 const { logger} = require("firebase-functions/v2");
-const {getFirestore} = require("firebase-admin/firestore");
+const {getFirestore, FieldValue, Timestamp} = require("firebase-admin/firestore");
 const {onConfigUpdated} = require("firebase-functions/v2/remoteConfig");
 const { defineString, defineSecret, defineInt } = require('firebase-functions/params');
 const {initializeApp} = require("firebase-admin/app");
@@ -23,6 +23,32 @@ const systemMessage = {
     content: SYSTEM_MESSAGE_STR || "You are bot, listen to human."
 };
 
+function createProfileMessage(profile, name) {
+    const safeName = name.replace(/(\r\n|\n|\r)/gm, "");
+    const safeProfile = { // remove newlines cause openai api doesn't like them
+        ...profile,
+        pronouns: profile.pronouns.replace(/(\r\n|\n|\r)/gm, ""),
+        sports: profile.sports.replace(/(\r\n|\n|\r)/gm, ""),
+        goals: profile.goals.replace(/(\r\n|\n|\r)/gm, "")
+    }
+
+    return {
+        role: 'system',
+        content: 
+            `Assigned User Info:` +
+            `Name: ${safeName}` +
+            `Pronouns: ${safeProfile.pronouns}` +
+            `Height: ${safeProfile.height + ((safeProfile.units.localeCompare("Metric") == 0) ? ' cm' : ' in')}` +
+            `Weight: ${safeProfile.weight + ((safeProfile.units.localeCompare("Metric") == 0) ? ' kg' : ' lbs')}` +
+            `Sports: ${safeProfile.sports}` +
+            `Goals (written by User): ${safeProfile.goals}` +
+            `Your User has chosen the following personality for you: ${profile.personality}` +
+            `Try to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting.` + 
+            `Feel free to use the User's name, pronouns, or any other info in responses.` + 
+            `Please stay in character, talk like your character and don't say you are an AI (unless that is your assigned personality).`
+    }
+}
+
 exports.chat = onCall({secrets: [OPENAI_API_KEY]}, async request => {
     try {
         const openai = new OpenAI({
@@ -36,57 +62,57 @@ exports.chat = onCall({secrets: [OPENAI_API_KEY]}, async request => {
         
         const profileDocSnap = await getFirestore().collection('profiles').doc(uid).get();
         if(!profileDocSnap.exists) throw new HttpsError('not-found', 'No profile doc found for this user.');
-
         const profile = profileDocSnap.data();
 
-        const profile_message = {
-            role: 'system',
-            content: `Assigned User Info:\n\nName: ${profile.name}\nPronouns: ${profile.pronouns}\nHeight: ${profile.height + (profile.units.localeCompare("Metric") ? ' cm' : ' in')}\nWeight: ${profile.weight + (profile.units.localeCompare("Metric") ? ' kg' : ' lbs')}\nSports: ${profile.sports}\nGoals (written by User): ${profile.goals}\n\nYour User has chosen the following personality for you: ${profile.personality}\nTry to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting. Feel free to use the User's name, pronouns, or any other info in responses. Please stay in character, talk like your character and don't say you are an AI.`
-        }
+        const profile_message = createProfileMessage(profile, request.data.name);
+        logger.log(profile_message);
 
-        const messagesDocSnap = await getFirestore().collection('messages').doc(uid).get();
+        const messagesDocRef = getFirestore().collection('messages').doc(uid);
+        const messagesDocSnap = await messagesDocRef.get();
         if(!messagesDocSnap.exists) throw new HttpsError('not-found', 'No messages doc found for this user.');
 
-        const messages = messagesDocSnap.data().messages;
+        const messages = messagesDocSnap.data().messages.map(message => {
+            //OpenAI api doesn't like createdAt
+            return {
+                role: message.role,
+                content: message.content,
+            } 
+        });
 
+        const new_message_createdAt = Timestamp.now(); // For accurate createdAt in firestore
         const new_message = {
             role: 'user',
-            content: request.body.message
+            content: request.data.message,
         };
 
-        const completion = await openai.createChatCompletion({
+        const completion = await openai.chat.completions.create({
             model: OPENAI_MODEL.value(),
             messages: [
                 systemMessage,
                 profile_message,
-                ...messages.map(message => ({content: message.content, role: message.role})),
+                ...messages,
                 new_message
             ],
             max_tokens: OPENAI_MAX_TOKENS.value(),
         });
 
-        const response = completion.data.choices[0].message;
+        new_message.createdAt = new_message_createdAt;
 
-        getFirestore().collection('messages').doc(uid).update({
-            messages: [
-                ...messages,
-                {
-                    ...new_message,
-                    createdAt: new Date()
-                },
-                {
-                    ...response,
-                    createdAt: new Date()
-                }
-            ]
+        const choice = completion.choices[0].message;
+        const response = {
+            role: choice.role,
+            content: choice.content,
+            createdAt: Timestamp.now()
+        }
+        
+        messagesDocRef.update({
+            messages: FieldValue.arrayUnion(new_message, response)
         });
 
-        // Optimistically update the messages
+        // Optimistically update the messages before firestore update
+        //response.createdAt = new_message_createdAt.toJSON(); // can't send Date object to client, maybe clean this whole createdAt thing up later
         logger.log(response);
-        return {
-            text: response.content,
-            createdAt: response.createdAt,
-        };
+        return response;
     } catch (error) {
         logger.error(error);
         if (error instanceof HttpsError) {

@@ -13,3 +13,8 @@
 /frontend/.expo
 /frontend/web-build
 /frontend/dist
+
+#Firebae
+firebase-debug.log
+firebase.json
+.firebaserc

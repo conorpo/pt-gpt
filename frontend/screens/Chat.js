@@ -1,21 +1,15 @@
 import React, {useState, useCallback, useEffect, useContext} from 'react';
 import { SafeAreaView, Text, TextInput, View, ScrollView, StyleSheet} from 'react-native';
 import SettingsButton from '../components/SettingsButton.js';
-import {v4 as messageIdGenerator} from 'uuid';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { useMainContext } from '../contexts/Main.js';
 import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
 import { useTheme } from '@react-navigation/native';
 import messageService from '../services/messageService.js';
-import authService from '../services/authService.js';
 import { getAuth } from 'firebase/auth';
 
-/*
-    TODO: setup firebase function for chat
-*/
-
 const ChatScreen = ({navigation}) => {
-    const { profile, messages, setMessages } = useMainContext();
+    const {profile, messages, setMessages } = useMainContext();
     const [isTyping, setIsTyping] = useState(false);
 
     const colors = useTheme().colors;
@@ -32,25 +26,18 @@ const ChatScreen = ({navigation}) => {
         }
     });
 
-    const onSend = useCallback(async (msgs = []) => {      
-        setMessages(previousMessages => GiftedChat.append(previousMessages, msgs))
-        try {
-            setIsTyping(true);  
-            const {text, createdAt} = await messageService.chat(msgs[0].text);
-            setIsTyping(false);
+    useEffect(() => {
+        messageService.getMessagesDoc(setMessages, profile);
+    }, [])
 
-            setMessages(previousMessages => {
-                return GiftedChat.append(previousMessages, [{
-                    _id: messageIdGenerator(),
-                    text,
-                    createdAt,
-                    user: {
-                        _id: 2,
-                        name: profile.personality,
-                        avatar: `${config.URI}/imgs/personalities/${profile.personality}.png`
-                    }
-                }]);
-            });
+    const onSend = useCallback(async (sentMessages = []) => {      
+        try {
+            //Tell me this shits not beautiful
+            setMessages(previousMessages => GiftedChat.append(previousMessages, sentMessages))
+            setIsTyping(true);  
+            const responseMessage = await messageService.chat(sentMessages[0].text, profile);
+            setIsTyping(false);
+            setMessages(previousMessages => GiftedChat.append(previousMessages, responseMessage));
         } catch (err) {
             console.log(err);
         }
