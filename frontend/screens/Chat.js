@@ -3,17 +3,19 @@ import { SafeAreaView, Text, TextInput, View, ScrollView, StyleSheet} from 'reac
 import SettingsButton from '../components/SettingsButton.js';
 import {v4 as messageIdGenerator} from 'uuid';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
-import { MainContext } from '../contexts/Main.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMainContext } from '../contexts/Main.js';
 import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
 import { useTheme } from '@react-navigation/native';
+import messageService from '../services/messageService.js';
+import authService from '../services/authService.js';
+import { getAuth } from 'firebase/auth';
 
-
-
-
+/*
+    TODO: setup firebase function for chat
+*/
 
 const ChatScreen = ({navigation}) => {
-    const {} = useContext(MainContext);
+    const { profile, messages, setMessages } = useMainContext();
     const [isTyping, setIsTyping] = useState(false);
 
     const colors = useTheme().colors;
@@ -28,23 +30,15 @@ const ChatScreen = ({navigation}) => {
         view: {
             flex: 1,
         }
-      });
+    });
 
     const onSend = useCallback(async (msgs = []) => {      
         setMessages(previousMessages => GiftedChat.append(previousMessages, msgs))
         try {
             setIsTyping(true);  
-            const response = await fetch(`${config.URI}/api/protected/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({msg: msgs[0].text})
-            })
-            const {text, createdAt} = await response.json();
-
+            const {text, createdAt} = await messageService.chat(msgs[0].text);
             setIsTyping(false);
+
             setMessages(previousMessages => {
                 return GiftedChat.append(previousMessages, [{
                     _id: messageIdGenerator(),
@@ -52,8 +46,8 @@ const ChatScreen = ({navigation}) => {
                     createdAt,
                     user: {
                         _id: 2,
-                        name: user.personality,
-                        avatar: `${config.URI}/imgs/personalities/${user.personality}.png`
+                        name: profile.personality,
+                        avatar: `${config.URI}/imgs/personalities/${profile.personality}.png`
                     }
                 }]);
             });
@@ -73,10 +67,10 @@ const ChatScreen = ({navigation}) => {
                 isTyping={isTyping}
                 shouldUpdateMessage={() => true}
                 messages={messages}
-                onSend={messages => onSend(messages)}
+                onSend={msgs => onSend(msgs)}
                 user={{
                     _id: "user",
-                    name: user.name,
+                    name: getAuth().currentUser.displayName,
                 }}
                 renderBubble={props => {
                     return (

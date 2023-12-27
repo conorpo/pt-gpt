@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image, View } from 'react-native';
 import { DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
+
 
 //Initialize Firebase
 import _ from './config/firebaseConfig';
@@ -28,52 +29,44 @@ const DarkTheme = {
 }
 
 const App = () => {
+
+  const styles = StyleSheet.create({
+    card: {
+      backgroundColor: '#44d2de',
+    },
+    header: {
+      height: 100,
+      width: '100%',
+      resizeMode: 'contain',
+    }
+  });
+
+  
   return (
     <MainProvider>
-      <NavigationContainer theme={DarkTheme}>
-        <Stack.Navigator 
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-            // headerBackground: () => (
-            //   <Image
-            //     style={styles.header}
-            //     source={require('./assets/imgs/logos/banner_logo.png')}
-            //   />
-            // ),
-          }}
-        >
-          <Stack.Screen 
-            name="Chat" 
-            component={ChatScreen}
-            options={{
-              headerShown: false,
-            }} 
-
-          />
-          <Stack.Screen 
-            name="Profile" 
-            component={ProfileScreen} 
-          />
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen} 
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+        <NavigationContainer theme={DarkTheme}>
+          <Stack.Navigator 
+            initialRouteName="Login"
+            screenOptions={{
+              headerShown: false
+            }}
+          >
+            <Stack.Screen 
+              name="Chat" 
+              component={ChatScreen}
+            />
+            <Stack.Screen 
+              name="Profile" 
+              component={ProfileScreen} 
+            />
+            <Stack.Screen 
+              name="Login" 
+              component={LoginScreen} 
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
     </MainProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#44d2de',
-  },
-  header: {
-    height: 100,
-    width: '100%',
-    resizeMode: 'contain',
-  }
-});
 
 export default App;

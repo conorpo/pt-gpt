@@ -8,15 +8,20 @@ import { useMainContext } from '../contexts/Main';
 
 import authService from '../services/authService'; 
 import profileService from '../services/profileService';
+import messageService from '../services/messageService';
 
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+/*
+    TODO: setup new login flow that uses firebase function
+*/
 
 const LoginScreen = ({ navigation }) => {
     const [email, onChangeEmail] = React.useState('');
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
 
-    const { showAlertModal } = useMainContext();
+    const { showAlertModal, profile, setProfile, setMessages } = useMainContext();
 
     const {colors} = useTheme();
 
@@ -29,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
             borderColor: colors.primary,
             borderRadius: 20,
             padding: 10,
-            color: colors.text
+            color: colors.text,
         },
         button: {
             height: 40,
@@ -56,16 +61,21 @@ const LoginScreen = ({ navigation }) => {
         }
     });
 
-    const loginListener = onAuthStateChanged(getAuth(), async (user) => {
-        try {
-            await profileService.getProfileDoc();
-            await messageService.getMessagesDoc();
-            navigation.navigate('Chat');
-        } catch (err) {
-            console.log(err);
-            showAlertModal(err.message);
-        }
-    });
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
+            if (!user) return;
+            try {
+                await profileService.getProfileDoc(setProfile);
+                await messageService.getMessagesDoc(setMessages);
+                navigation.navigate('Chat');
+            } catch (err) {
+                console.log(err);
+                showAlertModal(err.message);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
 
     async function loginHandler() {
         try {
@@ -78,12 +88,8 @@ const LoginScreen = ({ navigation }) => {
 
     async function registerHandler() {
         try {
-            loginListener(); // Remove the listener so that it doesn't fire when we register
             await authService.register(email, password, name); //Fields are validated in authService
-            await profileService.setProfileDoc();
-            await messageService.setMessagesDoc();
-           
-            showAlertModal("Please check your email for a verification link!");
+            //showAlertModal("Please check your email for a verification link!");
         } catch (err) {
             console.log(err);
             showAlertModal(err.message);
@@ -93,10 +99,6 @@ const LoginScreen = ({ navigation }) => {
     return (
         <View>
             <Text style={styles.welcome}>Welcome to PT-GPT!</Text>
-            <Text
-                ref={errorRef}
-                style={styles.error}
-            />
             <TextInput
                 style={styles.input}
                 onChangeText={onChangeEmail}

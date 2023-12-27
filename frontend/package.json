@@ -18,7 +18,7 @@
     "firebase": "^10.7.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "0.71.7",
+    "react-native": "0.71.14",
     "react-native-async-storage": "^0.0.1",
     "react-native-awesome-alerts": "^2.0.0",
     "react-native-gifted-chat": "^2.4.0",
@@ -30,6 +30,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
     "@babel/traverse": "^7.23.2"
   },
   "private": true

@@ -1,16 +1,34 @@
 const {onCall, HttpsError} = require("firebase-functions/v2/https");
-const {logger} = require("firebase-functions/v2");
+const functions = require("firebase-functions");
+const { logger} = require("firebase-functions/v2");
 const {getFirestore} = require("firebase-admin/firestore");
+const {onConfigUpdated} = require("firebase-functions/v2/remoteConfig");
+const { defineString, defineSecret, defineInt } = require('firebase-functions/params');
+const {initializeApp} = require("firebase-admin/app");
 
-const openai = require('../config/openai_connection');
+const {OpenAI} = require('openai');
 
-const SYSTEM_MESSAGE = {
+initializeApp();
+
+// Env Parameters
+const SYSTEM_MESSAGE_STR = defineString('SYSTEM_MESSAGE_STR');
+
+const OPENAI_MAX_TOKENS = defineInt('OPENAI_MAX_TOKENS');
+const OPENAI_MODEL = defineString('OPENAI_MODEL');
+const OPENAI_ORGANIZATION = defineString('OPENAI_ORGANIZATION');
+const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
+
+const systemMessage = {
     role: 'system',
-    content: process.env.SYSTEM_MESSAGE || "You are bot, listen to human."
+    content: SYSTEM_MESSAGE_STR || "You are bot, listen to human."
 };
+
+let openai = null;
 
 exports.chat = onCall(async request => {
     try {
+        if(!openai) throw new HttpsError('unavailable', 'OpenAI is not initialized.');
+
         const uid = request.auth.uid;
         if(!uid) throw new HttpsError('unauthenticated', 'User is not authenticated.');
         
@@ -31,18 +49,18 @@ exports.chat = onCall(async request => {
 
         const new_message = {
             role: 'user',
-            content: request.body.msg
+            content: request.body.message
         };
 
         const completion = await openai.createChatCompletion({
-            model: process.env.OPENAI_MODEL,
+            model: OPENAI_MODEL.value(),
             messages: [
-                SYSTEM_MESSAGE,
+                systemMessage,
                 profile_message,
                 ...messages.map(message => ({content: message.content, role: message.role})),
                 new_message
             ],
-            max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS),
+            max_tokens: OPENAI_MAX_TOKENS.value(),
         });
 
         const response = completion.data.choices[0].message;
@@ -62,11 +80,13 @@ exports.chat = onCall(async request => {
         });
 
         // Optimistically update the messages
+        logger.log(response);
         return {
             text: response.content,
             createdAt: response.createdAt,
         };
     } catch (error) {
+        logger.error(error);
         if (error instanceof HttpsError) {
             throw error;
         } else {
@@ -80,3 +100,11 @@ exports.setupNewUser = functions.auth.user().onCreate(async (user) => {
     await getFirestore().collection('profiles').doc(user.uid).set({personality: 'AI', units: 'Metric'});
     await getFirestore().collection('messages').doc(user.uid).set({messages: []});
 });
+
+exports.onConfigUpdated = onConfigUpdated({secrets: [OPENAI_API_KEY]},(snapshot) => {
+    openai = new OpenAI({
+        apiKey: OPENAI_API_KEY.value(),
+        organization: OPENAI_ORGANIZATION.value()
+    });
+});
+

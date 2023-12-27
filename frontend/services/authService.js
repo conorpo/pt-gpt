@@ -1,7 +1,6 @@
 // Handles the authentication of the user
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, sendPasswordResetEmail, updateProfile, updateEmail, verifyBeforeUpdateEmail, onAuthStateChanged} from "firebase/auth";
-import { useMainContext } from "../contexts/Main";
-import { validateEmail, validatePassword, validateName } from "../utils/validators";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, sendPasswordResetEmail, updateProfile, updateEmail, verifyBeforeUpdateEmail} from "firebase/auth";
+import { validateEmail, validatePassword, validateName } from "../util/validators";
 import profileService from "./profileService";
 
 const auth = getAuth();

@@ -15,9 +15,8 @@ import profileService from "../services/profileService";
 const unitOptions = ["Metric", "Imperial"];
 const personalityOptions = ["AI", "Cthulhu", "Dracula", "Hercules", "Mickey Mouse", "Popeye", "Robin Hood", "Sherlock", "Tarzan", "Thor", "Zorro"];
 
-
 const ProfileScreen = ({ navigation }) => {
-    const { profile } = useMainContext();
+    const { profile, setProfile } = useMainContext();
     
     const auth = getAuth();
 
@@ -111,7 +110,7 @@ const ProfileScreen = ({ navigation }) => {
         try {
             if(difference.name) await authService.updateProfile({displayName: name});
             if(difference.email) await authService.updateEmail(email);
-            if(difference.profile) await profileService.updateProfile(localProfile);          
+            if(difference.profile) await profileService.setProfileDoc(profile, setProfile, localProfile);          
         } catch (err) {
             console.log(err);
             showAlertModal(err.message);
