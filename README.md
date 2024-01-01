@@ -3,6 +3,8 @@
 A GPT-4 powered AI Personal Trainer. 
 Made as a Final Project for COP4331 - Processes of Object Oriented Programming (POOP)
 
+[App Link](https://pt-gpt.web.app/)
+
 ### Authors
 - [Conor O'Malley](https://github.com/conorpo)
 - [Jose Urrea](https://github.com/JoseAUrrea)

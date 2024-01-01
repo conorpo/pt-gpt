@@ -21,7 +21,7 @@ const LoginScreen = ({ navigation }) => {
     const [name, onChangeName] = React.useState('');
     const [password, onChangePassword] = React.useState('');
 
-    const { showAlertModal, profile, setProfile, setMessages } = useMainContext();
+    const { showAlertModal, profile, setProfile } = useMainContext();
 
     const {colors} = useTheme();
 
@@ -66,8 +66,6 @@ const LoginScreen = ({ navigation }) => {
             if (!user) return;
             try {
                 await profileService.getProfileDoc(setProfile);
-                //await messageService.getMessagesDoc(setMessages);
-                // doing this in Chat.js now, had some react issues
                 navigation.navigate('Chat');
             } catch (err) {
                 console.log(err);

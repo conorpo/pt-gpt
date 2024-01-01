@@ -4,12 +4,13 @@ import SettingsButton from '../components/SettingsButton.js';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { useMainContext } from '../contexts/Main.js';
 import TypingIndicator from "react-native-gifted-chat/lib/TypingIndicator"
-import { useTheme } from '@react-navigation/native';
+import { useFocusEffect, useTheme } from '@react-navigation/native';
 import messageService from '../services/messageService.js';
 import { getAuth } from 'firebase/auth';
+import AlertModal from '../components/AlertModal';
 
 const ChatScreen = ({navigation}) => {
-    const {profile, messages, setMessages } = useMainContext();
+    const {profile, messages, setMessages, showAlertModal} = useMainContext();
     const [isTyping, setIsTyping] = useState(false);
 
     const colors = useTheme().colors;
@@ -27,8 +28,15 @@ const ChatScreen = ({navigation}) => {
     });
 
     useEffect(() => {
-        messageService.getMessagesDoc(setMessages, profile);
-    }, [])
+        (async function getMessages() {
+            try {
+                await messageService.getMessagesDoc(setMessages, profile);
+            } catch (err) {
+                console.log(err);
+                showAlertModal("Error", "Failed to load messages");
+            }
+        })();
+    }, []);
 
     const onSend = useCallback(async (sentMessages = []) => {      
         try {
@@ -40,9 +48,10 @@ const ChatScreen = ({navigation}) => {
             setMessages(previousMessages => GiftedChat.append(previousMessages, responseMessage));
         } catch (err) {
             console.log(err);
+            showAlertModal("Error", "Failed to send message");
         }
         
-    }, [])
+    }, [profile])
 
     return (
         <View style={styles.view}>
@@ -90,7 +99,8 @@ const ChatScreen = ({navigation}) => {
                       />
                     );
                   }}
-            />            
+            />
+            <AlertModal></AlertModal>            
         </View>
     );
     

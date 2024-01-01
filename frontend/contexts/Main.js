@@ -3,9 +3,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 const MainContext = createContext();
 
 export const MainProvider = ({ children }) => {
-    const [profile, setProfile] = useState(null); // Firestore User Profile
+    const [profile, setProfile] = useState({}); // Firestore User Profile
     const [messages, setMessages] = useState([]);
-    const [token, setToken] = useState(null);
 
     const [alertModalVisible, setAlertModalVisible] = useState(false);
     const [alertModalMessage, setAlertModalMessage] = useState('');
@@ -21,8 +20,6 @@ export const MainProvider = ({ children }) => {
             setProfile,
             messages,
             setMessages,
-            token,
-            setToken,
             showAlertModal,
             alertModalVisible,
             setAlertModalVisible,

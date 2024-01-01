@@ -27,24 +27,24 @@ function createProfileMessage(profile, name) {
     const safeName = name.replace(/(\r\n|\n|\r)/gm, "");
     const safeProfile = { // remove newlines cause openai api doesn't like them
         ...profile,
-        pronouns: profile.pronouns.replace(/(\r\n|\n|\r)/gm, ""),
-        sports: profile.sports.replace(/(\r\n|\n|\r)/gm, ""),
-        goals: profile.goals.replace(/(\r\n|\n|\r)/gm, "")
+        pronouns: profile.pronouns?.replace(/(\r\n|\n|\r)/gm, ""),
+        sports: profile.sports?.replace(/(\r\n|\n|\r)/gm, ""),
+        goals: profile.goals?.replace(/(\r\n|\n|\r)/gm, "")
     }
 
     return {
         role: 'system',
         content: 
-            `Assigned User Info:` +
-            `Name: ${safeName}` +
-            `Pronouns: ${safeProfile.pronouns}` +
-            `Height: ${safeProfile.height + ((safeProfile.units.localeCompare("Metric") == 0) ? ' cm' : ' in')}` +
-            `Weight: ${safeProfile.weight + ((safeProfile.units.localeCompare("Metric") == 0) ? ' kg' : ' lbs')}` +
-            `Sports: ${safeProfile.sports}` +
-            `Goals (written by User): ${safeProfile.goals}` +
-            `Your User has chosen the following personality for you: ${profile.personality}` +
-            `Try to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting.` + 
-            `Feel free to use the User's name, pronouns, or any other info in responses.` + 
+            `Assigned User Info: ` +
+            `Name: ${safeName}, ` +
+            `Pronouns: ${safeProfile.pronouns}, ` +
+            `Height: ${safeProfile.height + ((safeProfile.units.localeCompare("Metric") == 0) ? ' cm' : ' in')}, ` +
+            `Weight: ${safeProfile.weight + ((safeProfile.units.localeCompare("Metric") == 0) ? ' kg' : ' lbs')}, ` +
+            `Sports: ${safeProfile.sports}, ` +
+            `Goals (written by User): ${safeProfile.goals}, ` +
+            `Your User has chosen the following personality for you: ${profile.personality}. ` +
+            `Try to embody the personality that your user has chosen, speak mostly objectively and always answer as best you can, but feel free to add some of the personality to the conversation, and embellish some sentences to make them more interesting. ` + 
+            `Feel free to use the User's name, pronouns, or any other info in responses. ` + 
             `Please stay in character, talk like your character and don't say you are an AI (unless that is your assigned personality).`
     }
 }

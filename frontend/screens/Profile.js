@@ -13,8 +13,9 @@ import authService from "../services/authService";
 import { getAuth } from "firebase/auth";
 import profileService from "../services/profileService";
 
+import {assets, personalityOptions} from '../config/assetConfig';
+
 const unitOptions = ["Metric", "Imperial"];
-const personalityOptions = ["AI", "Cthulhu", "Dracula", "Hercules", "Mickey Mouse", "Popeye", "Robin Hood", "Sherlock", "Tarzan", "Thor", "Zorro"];
 
 const ProfileScreen = ({ navigation }) => {
     const { profile, setProfile } = useMainContext();
@@ -69,9 +70,12 @@ const ProfileScreen = ({ navigation }) => {
             borderRadius: 10,
             padding: 1,
             textAlign: "center",
+            width: "90%",
+            marginVertical: 3,
+            marginHorizontal: "5%",
         },
         disabledButton: {
-            backgroundColor: "#00000022",
+            backgroundColor: colors.primary + "55",
             pointerEvents: "none"
         },
         buttonText: {
@@ -79,6 +83,7 @@ const ProfileScreen = ({ navigation }) => {
             color: "#000000"
         }
     });
+
 
     function initializeLocalState() {
         setLocalProfile({
@@ -99,7 +104,6 @@ const ProfileScreen = ({ navigation }) => {
             profile: false
         })
     }
-    useEffect(initializeLocalState, [profile]); // Whenever profile changes, update local state
 
     useEffect(() => {
         setDifference({
@@ -107,18 +111,22 @@ const ProfileScreen = ({ navigation }) => {
             name: name.localeCompare(auth.currentUser.displayName) != 0
         })
     }, [name]); // Whenever state changes, check if there are pending changes
+
     useEffect(() => {
         setDifference({
             ...difference,
             email: email.localeCompare(auth.currentUser.email) != 0
         })
     }, [email]); // Whenever state changes, check if there are pending changes
+
     useEffect(() => {
+        console.log(profile.personality);
         setDifference({
             ...difference,
             profile: Object.keys(localProfile).some(key => localProfile[key] != profile[key])
         })
-    }, [localProfile]); // Whenever state changes, check if there are pending changes
+    }, [localProfile, profile]); // Whenever state changes, check if there are pending changes
+
     
     async function update() {
         try {
@@ -142,7 +150,7 @@ const ProfileScreen = ({ navigation }) => {
 
             <Image
                 style={{height: 80, width: "100%",resizeMode: "contain", alignSelf: "center" }}
-                source={require('../assets/imgs/logos/banner_logo.png')}
+                source={assets.logos.banner}
             />
 
             <View
